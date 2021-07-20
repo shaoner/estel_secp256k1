@@ -35,13 +35,6 @@ impl El {
         self.d[4] *= n;
     }
 
-    pub fn mul_scalar(&self, n: u64) -> Self {
-        let mut r = *self;
-
-        r.mul_scalar_assign(n);
-        return r;
-    }
-
     pub fn mul_fe(&mut self, b: &Self) {
         const M52: u128 = 0x000fffffffffffffu128; // 2^52 - 1
         const M48: u64 = 0x0000ffffffffffffu64; // 2^48 - 1
@@ -286,6 +279,17 @@ impl AddAssign<El> for El {
     }
 }
 
+impl Mul<u64> for El {
+    type Output = El;
+
+    fn mul(self, rhs: u64) -> El {
+        let mut r = self;
+
+        r.mul_scalar_assign(rhs);
+        r
+    }
+}
+
 impl Mul<El> for El {
     type Output = El;
 
@@ -308,15 +312,22 @@ impl<'a, 'b> Mul<&'a El> for &'b El {
     }
 }
 
-impl<'a> MulAssign<&'a El> for El {
-    fn mul_assign(&mut self, rhs: &'a El) {
-        self.mul_fe(rhs);
+impl MulAssign<u64> for El {
+    fn mul_assign(&mut self, rhs: u64) {
+        self.mul_scalar_assign(rhs)
     }
 }
 
 impl MulAssign<El> for El {
     fn mul_assign(&mut self, rhs: El) {
         self.mul_assign(&rhs)
+    }
+}
+
+
+impl<'a> MulAssign<&'a El> for El {
+    fn mul_assign(&mut self, rhs: &'a El) {
+        self.mul_fe(rhs);
     }
 }
 
@@ -446,7 +457,7 @@ mod tests {
             0xffffffffffffffffu64,
             0xfffffbfefffffc2fu64,
         );
-        let mut r = a.mul_scalar(0x942u64);
+        let mut r = a * 0x942u64;
         r.reduce();
         // r = ((p - 2^42) * 0x942) % p
         let expected = El::new(
@@ -468,7 +479,7 @@ mod tests {
             0xffffffffffffffffu64,
             0xfffffbfefffffc2fu64,
         );
-        let mut r = a.mul_scalar(0x942u64);
+        let mut r = a * 0x942u64;
         let r2 = r;
 
         r.reduce();
