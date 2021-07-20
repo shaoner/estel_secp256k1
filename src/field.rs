@@ -35,7 +35,7 @@ impl El {
         self.d[4] *= n;
     }
 
-    pub fn mul_fe(&mut self, b: &Self) {
+    pub fn mul_fe_assign(&mut self, b: &Self) {
         const M52: u128 = 0x000fffffffffffffu128; // 2^52 - 1
         const M48: u64 = 0x0000ffffffffffffu64; // 2^48 - 1
         const P0: u128 = 0x1000003d1u128; // 2^32 + 977
@@ -327,7 +327,7 @@ impl MulAssign<El> for El {
 
 impl<'a> MulAssign<&'a El> for El {
     fn mul_assign(&mut self, rhs: &'a El) {
-        self.mul_fe(rhs);
+        self.mul_fe_assign(rhs);
     }
 }
 
