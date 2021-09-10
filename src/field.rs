@@ -2,6 +2,14 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
+use crate::modinv::I320;
+
+const P: I320 = I320::new(0x0000000000000000,
+                          0xffffffffffffffff,
+                          0xffffffffffffffff,
+                          0xffffffffffffffff,
+                          0xfffffffefffffc2f);
+
 /// Represent a Field Element with P = 2^256 - 2^32 - 977
 #[derive(Clone, Copy, Eq)]
 pub struct El {
@@ -24,6 +32,26 @@ impl El {
 
     pub fn is_zero(&self) -> bool {
         self.d[0] | self.d[1] | self.d[2] | self.d[3] | self.d[4] == 0
+    }
+
+    fn to_i320(&self) -> I320 {
+        let d0 = (self.d[0] >> 0) | (self.d[1] << 52);
+        let d1 = (self.d[1] >> 12) | (self.d[2] << 40);
+        let d2 = (self.d[2] >> 24) | (self.d[3] << 28);
+        let d3 = (self.d[3] >> 36) | (self.d[4] << 16);
+
+        I320::new(0, d3, d2, d1, d0)
+    }
+
+    fn from_i320(&mut self, n: &I320) {
+
+        let d0 = n.d[0] & 0x000fffffffffffff;
+        let d1 = n.d[0] >> 52 | (n.d[1] & 0x000000ffffffffff) << 12;
+        let d2 = n.d[1] >> 40 | (n.d[2] & 0x000000000fffffff) << 24;
+        let d3 = n.d[2] >> 28 | (n.d[3] & 0x000000000000ffff) << 36;
+        let d4 = n.d[3] >> 16;
+
+        self.d = [d0, d1, d2, d3, d4];
     }
 
     pub fn mul_scalar_assign(&mut self, n: u64) {
@@ -184,6 +212,13 @@ impl El {
         t4 = tx as u64;
 
         self.d = [t0, t1, t2, t3, t4];
+    }
+
+    pub fn inverse(&mut self) {
+        self.reduce();
+        let mut n = self.to_i320();
+        n.modinv(&P);
+        self.from_i320(&n);
     }
 
     pub fn reduce(&mut self) {
@@ -569,5 +604,25 @@ mod tests {
         assert!(a <= a);
         assert!(b > a);
         assert!(b >= a);
+    }
+
+    #[test]
+    fn it_tests_inverse() {
+        // a=0xfffffffffffffffffffffffffffffffffffffffffffffffffffffbfefffffc2f = p - 2^42
+        let a = El::new(
+            0xffffffffffffffffu64,
+            0xffffffffffffffffu64,
+            0xffffffffffffffffu64,
+            0xfffffbfefffffc2fu64,
+        );
+        let n_1 = El::new(0x0, 0x0, 0x0, 0x1);
+
+        let mut a_inv = a;
+        a_inv.inverse();
+
+        let mut r = a * a_inv;
+        r.reduce();
+
+        assert_eq!(r, n_1);
     }
 }
