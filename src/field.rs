@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
@@ -331,6 +332,26 @@ impl<'a> MulAssign<&'a El> for El {
     }
 }
 
+impl Ord for El {
+    fn cmp(&self, other: &Self) -> Ordering {
+        for i in (0..4).rev() {
+            if self.d[i] > other.d[i] {
+                return Ordering::Greater;
+            }
+            if self.d[i] < other.d[i] {
+                return Ordering::Less;
+            }
+        }
+        Ordering::Equal
+    }
+}
+
+impl PartialOrd for El {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 impl PartialEq for El {
     fn eq(&self, rhs: &Self) -> bool {
         let mut a = *self;
@@ -488,4 +509,26 @@ mod tests {
         assert_eq!(r, r2);
     }
 
+    #[test]
+    fn it_tests_ordering() {
+        // A=0xfffffffffffffffffffffffffffffffffffffffffffffffffffffbfefffffc2f = p - 2^42
+        // N=0x942
+        let a = El::new(
+            0xffffffffffffffffu64,
+            0xffffffffffffffffu64,
+            0xffffffffffffffffu64,
+            0xfffffbfefffffc2fu64,
+        );
+        let b = a + El::new(0x0, 0x0, 0x0, 0x1);
+        let mut r = a * 0x942u64;
+        r.reduce();
+
+        // r = ((p - 2^42) * 0x942) % p
+        assert!(r < a);
+        assert!(a > r);
+        assert!(r >= r);
+        assert!(a <= a);
+        assert!(b > a);
+        assert!(b >= a);
+    }
 }
