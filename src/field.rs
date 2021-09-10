@@ -207,7 +207,7 @@ impl El {
         d3 &= M52;
 
         // n >= P
-        if d4 > M48 || (d4 == M48 && d3 | d2 | d1 == M52 && d0 >= 0xffffefffffc2f) {
+        if d4 > M48 || (d4 == M48 && (d3 & d2 & d1) == M52 && d0 >= 0xffffefffffc2f) {
             if d4 > M48 {
                 c = d4 >> 48;
             } else {
