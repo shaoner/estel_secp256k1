@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use std::fmt;
-use std::ops::{Add, AddAssign, Mul, MulAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
 /// Represent a Field Element with P = 2^256 - 2^32 - 977
 #[derive(Clone, Copy, Eq)]
@@ -194,6 +194,7 @@ impl El {
         let mut c: u64;
 
         c = d4 >> 48;
+
         d4 &= M48;
         d0 += c * P0;
         d1 += d0 >> 52;
@@ -332,6 +333,45 @@ impl<'a> MulAssign<&'a El> for El {
     }
 }
 
+impl Sub<El> for El {
+    type Output = El;
+
+    fn sub(self, rhs: El) -> El {
+        let mut r = self;
+
+        r.sub_assign(&rhs);
+        r
+    }
+}
+
+impl<'a, 'b> Sub<&'a El> for &'b El {
+    type Output = El;
+
+    fn sub(self, rhs: &'a El) -> El {
+        let mut r = *self;
+
+        r.sub_assign(rhs);
+        r
+    }
+}
+
+impl<'a> SubAssign<&'a El> for El {
+    fn sub_assign(&mut self, rhs: &'a El) {
+        // r = r + (-a)
+        self.d[0] += 0xffffefffffc2fu64 * 2 - rhs.d[0];
+        self.d[1] += 0xfffffffffffffu64 * 2 - rhs.d[1];
+        self.d[2] += 0xfffffffffffffu64 * 2 - rhs.d[2];
+        self.d[3] += 0xfffffffffffffu64 * 2 - rhs.d[3];
+        self.d[4] += 0x0ffffffffffffu64 * 2 - rhs.d[4];
+    }
+}
+
+impl SubAssign<El> for El {
+    fn sub_assign(&mut self, rhs: El) {
+        self.sub_assign(&rhs)
+    }
+}
+
 impl Ord for El {
     fn cmp(&self, other: &Self) -> Ordering {
         for i in (0..4).rev() {
@@ -433,7 +473,6 @@ mod tests {
         let b = a;
         let mut r = a * b;
 
-        println!("r = {:?}", r);
         r.reduce();
 
         // r = ((p - 1) x (p - 1)) % p
