@@ -44,6 +44,21 @@ impl I320 {
         self.div2()
     }
 
+    fn normalize(&mut self, m: &Self) {
+        let s = self.d[4] >> 63;
+
+        if s > 0 {
+            self.add_assign(m);
+            let s2 = self.d[4] >> 63;
+
+            if s2 > 0 {
+                self.add_assign(m);
+            }
+        } else if *self >= *m {
+            *self -= m;
+        }
+    }
+
     pub fn modinv(&mut self, m: &Self) {
         let mut b = *m;
         let mut x = Self { d: [1, 0, 0, 0, 0] };
@@ -64,6 +79,7 @@ impl I320 {
                 x.div2_mod(m);
             }
         }
+        y.normalize(m);
         *self = y;
     }
 }
