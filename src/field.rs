@@ -622,7 +622,43 @@ mod tests {
 
         let mut r = a * a_inv;
         r.reduce();
-
         assert_eq!(r, n_1);
     }
+
+    #[test]
+    fn it_tests_inverse2() {
+        let mut b = El::new(
+            0x9075b4ee4d4788ca,
+            0xbb49f7f81c221151,
+            0xfa2f68914d0aa833,
+            0x388fa11ff621a970
+        );
+        let r2 = El::new(
+            0xb7e31a064ed74d31,
+            0x4de79011c5f0a46a,
+            0xc155602353dc3d34,
+            0x0fbeaeec9767a6a6
+        );
+        b.inverse();
+        assert_eq!(b, r2);
+    }
+
+    #[test]
+    fn it_tests_inverse3() {
+        let mut c = El::new(
+            0x955a14ded1a61169,
+            0x67f7af027561b409,
+            0xf3c66ca8c2c5dcad,
+            0x67dfe18cbfa9fa6c
+        );
+        let r = El::new(
+            0x1b17ded65c85729d,
+            0x4523ed7e305c613a,
+            0x10400c3e2e8ef0ed,
+            0x06fce4838dea63b8
+        );
+        c.inverse();
+        assert_eq!(c, r);
+    }
+
 }
