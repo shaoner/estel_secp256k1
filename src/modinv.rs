@@ -117,23 +117,23 @@ impl<'a> AddAssign<&'a I320> for I320 {
     fn add_assign(&mut self, rhs: &'a I320) {
         let mut t: u128;
 
-        t = self.d[0] as u128 + rhs.d[0] as u128;
+        t = (self.d[0] as u128).wrapping_add(rhs.d[0] as u128);
         self.d[0] = t as u64;
         t >>= 64;
 
-        t += self.d[1] as u128 + rhs.d[1] as u128;
+        t = (self.d[1] as u128).wrapping_add(t + rhs.d[1] as u128);
         self.d[1] = t as u64;
         t >>= 64;
 
-        t += self.d[2] as u128 + rhs.d[2] as u128;
+        t = (self.d[2] as u128).wrapping_add(t + rhs.d[2] as u128);
         self.d[2] = t as u64;
         t >>= 64;
 
-        t += self.d[3] as u128 + rhs.d[3] as u128;
+        t = (self.d[3] as u128).wrapping_add(t + rhs.d[3] as u128);
         self.d[3] = t as u64;
         t >>= 64;
 
-        t += self.d[4] as u128 + rhs.d[4] as u128;
+        t = (self.d[4] as u128).wrapping_add(t + rhs.d[4] as u128);
         self.d[4] = t as u64;
     }
 }
