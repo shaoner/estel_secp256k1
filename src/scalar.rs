@@ -14,6 +14,10 @@ impl Scalar {
         Self { d: [d0, d1, d2, d3, d4] }
     }
 
+    pub const fn from_u64(n: u64) -> Self {
+        Self::new(0, 0, 0, 0, n)
+    }
+
     pub fn is_even(&self) -> bool {
         self.d[0] & 0x1 == 0x0
     }
@@ -279,8 +283,8 @@ mod tests {
                             0xffffffffffffffff,
                             0xffffffffffffffff,
                             0xffffffffffffffff); // 2^319 - 1
-        let n_0 = Scalar::new(0, 0, 0, 0, 0);
-        let n_1 = Scalar::new(0, 0, 0, 0, 1);
+        let n_0 = Scalar::from_u64(0);
+        let n_1 = Scalar::from_u64(1);
 
         assert!(a < min_1);
         assert!(min_1 > a);

@@ -235,7 +235,7 @@ mod tests {
     fn it_checks_scalar_multiplication() {
         let mut p: Pt = G;
         let mut a = N;
-        let n_1 = Scalar::new(0, 0, 0, 0, 1);
+        let n_1 = Scalar::from_u64(1);
         a -= n_1;
         let res = Pt::new(El::new(0x79be667ef9dcbbac,
                                   0x55a06295ce870b07,
