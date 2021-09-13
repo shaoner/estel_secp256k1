@@ -5,7 +5,7 @@ use std::mem;
 
 /// Represent a i320 with support for carry
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub(crate) struct I320 {
+pub struct I320 {
     pub d: [u64; 5]
 }
 
@@ -14,15 +14,15 @@ impl I320 {
         Self { d: [d0, d1, d2, d3, d4] }
     }
 
-    fn is_even(&self) -> bool {
+    pub fn is_even(&self) -> bool {
         self.d[0] & 0x1 == 0x0
     }
 
-    fn is_zero(&self) -> bool {
+    pub fn is_zero(&self) -> bool {
         (self.d[0] | self.d[1] | self.d[2] | self.d[3] | self.d[4]) == 0
     }
 
-    fn div2(&mut self) {
+    pub fn div2(&mut self) {
         let mut t: u64;
 
         t = self.d[1] & 0x01;

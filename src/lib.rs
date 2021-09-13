@@ -1,2 +1,3 @@
+pub mod ecc;
 pub mod field;
-mod modinv;
+pub mod modinv;
