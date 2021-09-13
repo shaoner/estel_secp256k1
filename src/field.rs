@@ -34,7 +34,7 @@ impl El {
         self.d[0] | self.d[1] | self.d[2] | self.d[3] | self.d[4] == 0
     }
 
-    fn to_scalar(&self) -> Scalar {
+    pub fn to_scalar(&self) -> Scalar {
         let d0 = (self.d[0] >> 0) | (self.d[1] << 52);
         let d1 = (self.d[1] >> 12) | (self.d[2] << 40);
         let d2 = (self.d[2] >> 24) | (self.d[3] << 28);
@@ -43,7 +43,7 @@ impl El {
         Scalar::new(0, d3, d2, d1, d0)
     }
 
-    fn from_scalar(&mut self, n: &Scalar) {
+    pub fn from_scalar(&mut self, n: &Scalar) {
 
         let d0 = n.d[0] & 0x000fffffffffffff;
         let d1 = n.d[0] >> 52 | (n.d[1] & 0x000000ffffffffff) << 12;
