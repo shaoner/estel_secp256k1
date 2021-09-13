@@ -151,7 +151,7 @@ impl Scalar {
         self.div2()
     }
 
-    fn normalize(&mut self, m: &Self) {
+    pub fn normalize(&mut self, m: &Self) {
         let s = self.d[4] >> 63;
 
         if s > 0 {

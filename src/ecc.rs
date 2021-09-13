@@ -14,9 +14,9 @@ const G_Y: El = El::new(0x483ada7726a3c465,
                         0xfd17b448a6855419,
                         0x9c47d08ffb10d4b8);
 
-const G: Pt = Pt::new(G_X, G_Y);
+pub const G: Pt = Pt::new(G_X, G_Y);
 
-const N: Scalar = Scalar::new(0x0,
+pub const N: Scalar = Scalar::new(0x0,
                           0xffffffffffffffff,
                           0xfffffffffffffffe,
                           0xbaaedce6af48a03b,
@@ -24,9 +24,9 @@ const N: Scalar = Scalar::new(0x0,
 
 #[derive(Clone, Copy, Eq)]
 pub struct Pt {
-    x: El,
-    y: El,
-    inf: bool
+    pub x: El,
+    pub y: El,
+    pub inf: bool
 }
 
 pub const INFINITY: Pt = Pt {
