@@ -1,5 +1,5 @@
 use std::fmt;
-use std::ops::{Add, AddAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 use crate::field::El;
 use crate::scalar::Scalar;
@@ -169,6 +169,23 @@ impl<'a> AddAssign<&'a Pt> for Pt {
 impl AddAssign<Pt> for Pt {
     fn add_assign(&mut self, rhs: Pt) {
         self.add_assign(&rhs)
+    }
+}
+
+impl Mul<&Scalar> for Pt {
+    type Output = Pt;
+
+    fn mul(self, rhs: &Scalar) -> Pt {
+        let mut r = self;
+
+        r.mul_assign(rhs);
+        r
+    }
+}
+
+impl MulAssign<&Scalar> for Pt {
+    fn mul_assign(&mut self, rhs: &Scalar) {
+        self.mul_scalar_inner(rhs)
     }
 }
 
