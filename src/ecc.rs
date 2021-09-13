@@ -2,7 +2,7 @@ use std::fmt;
 use std::ops::{Add, AddAssign};
 
 use crate::field::El;
-use crate::modinv::I320;
+use crate::scalar::Scalar;
 
 const G_X: El = El::new(0x79be667ef9dcbbac,
                         0x55a06295ce870b07,
@@ -16,7 +16,7 @@ const G_Y: El = El::new(0x483ada7726a3c465,
 
 const G: Pt = Pt::new(G_X, G_Y);
 
-const N: I320 = I320::new(0x0,
+const N: Scalar = Scalar::new(0x0,
                           0xffffffffffffffff,
                           0xfffffffffffffffe,
                           0xbaaedce6af48a03b,
@@ -96,7 +96,7 @@ impl Pt {
         self.y = y3;
     }
 
-    pub fn mul_scalar_inner(&mut self, a: &I320) {
+    pub fn mul_scalar_inner(&mut self, a: &Scalar) {
         let mut n = *a;
 
         if n >= N {
@@ -218,7 +218,7 @@ mod tests {
     fn it_checks_scalar_multiplication() {
         let mut p: Pt = G;
         let mut a = N;
-        let n_1 = I320::new(0, 0, 0, 0, 1);
+        let n_1 = Scalar::new(0, 0, 0, 0, 1);
         a -= n_1;
         let res = Pt::new(El::new(0x79be667ef9dcbbac,
                                   0x55a06295ce870b07,

@@ -2,13 +2,13 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
-use crate::modinv::I320;
+use crate::scalar::Scalar;
 
-const P: I320 = I320::new(0x0000000000000000,
-                          0xffffffffffffffff,
-                          0xffffffffffffffff,
-                          0xffffffffffffffff,
-                          0xfffffffefffffc2f);
+const P: Scalar = Scalar::new(0x0000000000000000,
+                              0xffffffffffffffff,
+                              0xffffffffffffffff,
+                              0xffffffffffffffff,
+                              0xfffffffefffffc2f);
 
 /// Represent a Field Element with P = 2^256 - 2^32 - 977
 #[derive(Clone, Copy, Eq)]
@@ -34,16 +34,16 @@ impl El {
         self.d[0] | self.d[1] | self.d[2] | self.d[3] | self.d[4] == 0
     }
 
-    fn to_i320(&self) -> I320 {
+    fn to_scalar(&self) -> Scalar {
         let d0 = (self.d[0] >> 0) | (self.d[1] << 52);
         let d1 = (self.d[1] >> 12) | (self.d[2] << 40);
         let d2 = (self.d[2] >> 24) | (self.d[3] << 28);
         let d3 = (self.d[3] >> 36) | (self.d[4] << 16);
 
-        I320::new(0, d3, d2, d1, d0)
+        Scalar::new(0, d3, d2, d1, d0)
     }
 
-    fn from_i320(&mut self, n: &I320) {
+    fn from_scalar(&mut self, n: &Scalar) {
 
         let d0 = n.d[0] & 0x000fffffffffffff;
         let d1 = n.d[0] >> 52 | (n.d[1] & 0x000000ffffffffff) << 12;
@@ -216,9 +216,9 @@ impl El {
 
     pub fn inverse(&mut self) {
         self.reduce();
-        let mut n = self.to_i320();
+        let mut n = self.to_scalar();
         n.modinv(&P);
-        self.from_i320(&n);
+        self.from_scalar(&n);
     }
 
     pub fn reduce(&mut self) {

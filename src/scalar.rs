@@ -5,11 +5,11 @@ use std::mem;
 
 /// Represent a i320 with support for carry
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub struct I320 {
+pub struct Scalar {
     pub d: [u64; 5]
 }
 
-impl I320 {
+impl Scalar {
     pub const fn new(d4: u64, d3: u64, d2: u64, d1: u64, d0: u64) -> Self {
         Self { d: [d0, d1, d2, d3, d4] }
     }
@@ -84,17 +84,17 @@ impl I320 {
     }
 }
 
-impl fmt::Debug for I320 {
+impl fmt::Debug for Scalar {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "0x{:016x}{:016x}{:016x}{:016x}{:016x}",
                self.d[4], self.d[3], self.d[2], self.d[1], self.d[0])
     }
 }
 
-impl Add<I320> for I320 {
-    type Output = I320;
+impl Add<Scalar> for Scalar {
+    type Output = Scalar;
 
-    fn add(self, rhs: I320) -> I320 {
+    fn add(self, rhs: Scalar) -> Scalar {
         let mut r = self;
 
         r.add_assign(&rhs);
@@ -102,10 +102,10 @@ impl Add<I320> for I320 {
     }
 }
 
-impl<'a, 'b> Add<&'a I320> for &'b I320 {
-    type Output = I320;
+impl<'a, 'b> Add<&'a Scalar> for &'b Scalar {
+    type Output = Scalar;
 
-    fn add(self, rhs: &'a I320) -> I320 {
+    fn add(self, rhs: &'a Scalar) -> Scalar {
         let mut r = *self;
 
         r.add_assign(rhs);
@@ -113,8 +113,8 @@ impl<'a, 'b> Add<&'a I320> for &'b I320 {
     }
 }
 
-impl<'a> AddAssign<&'a I320> for I320 {
-    fn add_assign(&mut self, rhs: &'a I320) {
+impl<'a> AddAssign<&'a Scalar> for Scalar {
+    fn add_assign(&mut self, rhs: &'a Scalar) {
         let mut t: u128;
 
         t = (self.d[0] as u128).wrapping_add(rhs.d[0] as u128);
@@ -138,16 +138,16 @@ impl<'a> AddAssign<&'a I320> for I320 {
     }
 }
 
-impl AddAssign<I320> for I320 {
-    fn add_assign(&mut self, rhs: I320) {
+impl AddAssign<Scalar> for Scalar {
+    fn add_assign(&mut self, rhs: Scalar) {
         self.add_assign(&rhs)
     }
 }
 
-impl Sub<I320> for I320 {
-    type Output = I320;
+impl Sub<Scalar> for Scalar {
+    type Output = Scalar;
 
-    fn sub(self, rhs: I320) -> I320 {
+    fn sub(self, rhs: Scalar) -> Scalar {
         let mut r = self;
 
         r.sub_assign(&rhs);
@@ -155,10 +155,10 @@ impl Sub<I320> for I320 {
     }
 }
 
-impl<'a, 'b> Sub<&'a I320> for &'b I320 {
-    type Output = I320;
+impl<'a, 'b> Sub<&'a Scalar> for &'b Scalar {
+    type Output = Scalar;
 
-    fn sub(self, rhs: &'a I320) -> I320 {
+    fn sub(self, rhs: &'a Scalar) -> Scalar {
         let mut r = *self;
 
         r.sub_assign(rhs);
@@ -166,8 +166,8 @@ impl<'a, 'b> Sub<&'a I320> for &'b I320 {
     }
 }
 
-impl<'a> SubAssign<&'a I320> for I320 {
-    fn sub_assign(&mut self, rhs: &'a I320) {
+impl<'a> SubAssign<&'a Scalar> for Scalar {
+    fn sub_assign(&mut self, rhs: &'a Scalar) {
         let mut t: u128;
 
         t = (self.d[0] as u128).wrapping_sub(rhs.d[0] as u128);
@@ -195,14 +195,14 @@ impl<'a> SubAssign<&'a I320> for I320 {
     }
 }
 
-impl SubAssign<I320> for I320 {
-    fn sub_assign(&mut self, rhs: I320) {
+impl SubAssign<Scalar> for Scalar {
+    fn sub_assign(&mut self, rhs: Scalar) {
         self.sub_assign(&rhs)
     }
 }
 
-impl Ord for I320 {
-    fn cmp(&self, other: &I320) -> Ordering {
+impl Ord for Scalar {
+    fn cmp(&self, other: &Scalar) -> Ordering {
         if self.d[4] > other.d[4] {
             // same sign
             if (self.d[4] ^ other.d[4]) >> 63 == 0 {
@@ -231,7 +231,7 @@ impl Ord for I320 {
     }
 }
 
-impl PartialOrd for I320 {
+impl PartialOrd for Scalar {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
@@ -243,16 +243,16 @@ mod tests {
 
     #[test]
     fn it_div2() {
-        let mut a = I320::new(0x0000000000000000,
-                              0x0000000000000000,
-                              0x0000000000000000,
-                              0x0000000000000100,
-                              0x0000000000000000);
-        let b = I320::new(0x0000000000000000,
-                          0x0000000000000000,
-                          0x0000000000000000,
-                          0x0000000000000020,
-                          0x0000000000000000);
+        let mut a = Scalar::new(0x0000000000000000,
+                                0x0000000000000000,
+                                0x0000000000000000,
+                                0x0000000000000100,
+                                0x0000000000000000);
+        let b = Scalar::new(0x0000000000000000,
+                            0x0000000000000000,
+                            0x0000000000000000,
+                            0x0000000000000020,
+                            0x0000000000000000);
 
         a.div2();
         a.div2();
@@ -262,25 +262,25 @@ mod tests {
 
     #[test]
     fn it_tests_ordering() {
-        let a = I320::new(0x8000000000000000,
-                          0x0000000000000000,
-                          0x0000000000000000,
-                          0x0000000000000000,
-                          0x0000000000000000); // -2^319
+        let a = Scalar::new(0x8000000000000000,
+                            0x0000000000000000,
+                            0x0000000000000000,
+                            0x0000000000000000,
+                            0x0000000000000000); // -2^319
 
-        let min_1 = I320::new(0xffffffffffffffff,
-                          0xffffffffffffffff,
-                          0xffffffffffffffff,
-                          0xffffffffffffffff,
-                          0xffffffffffffffff); // -1
+        let min_1 = Scalar::new(0xffffffffffffffff,
+                                0xffffffffffffffff,
+                                0xffffffffffffffff,
+                                0xffffffffffffffff,
+                                0xffffffffffffffff); // -1
 
-        let b = I320::new(0x7fffffffffffffff,
-                          0xffffffffffffffff,
-                          0xffffffffffffffff,
-                          0xffffffffffffffff,
-                          0xffffffffffffffff); // 2^319 - 1
-        let n_0 = I320::new(0, 0, 0, 0, 0);
-        let n_1 = I320::new(0, 0, 0, 0, 1);
+        let b = Scalar::new(0x7fffffffffffffff,
+                            0xffffffffffffffff,
+                            0xffffffffffffffff,
+                            0xffffffffffffffff,
+                            0xffffffffffffffff); // 2^319 - 1
+        let n_0 = Scalar::new(0, 0, 0, 0, 0);
+        let n_1 = Scalar::new(0, 0, 0, 0, 1);
 
         assert!(a < min_1);
         assert!(min_1 > a);
@@ -312,43 +312,39 @@ mod tests {
 
     #[test]
     fn it_modinv() {
-        let mut a = I320::new(0x0000000000000000,
-                              0xffffffffffffffff,
-                              0xffffffffffffffff,
-                              0xffffffffffffffff,
-                              0xfffffbfefffffc2f);
-        let mut b = I320::new(0x0000000000000000,
-                              0x7fffffffffffffff,
-                              0xffffffffffffffff,
-                              0xffffffffffffffff,
-                              0xffffffff7ffffe18);
-        let mut c = I320::new(0x0000000000000000,
-                              0x0000000000000000,
-                              0x0000000000000000,
-                              0x0000000000000000,
-                              0x0000000000111111);
+        let mut a = Scalar::new(0x0000000000000000,
+                                0xffffffffffffffff,
+                                0xffffffffffffffff,
+                                0xffffffffffffffff,
+                                0xfffffbfefffffc2f);
+        let mut b = Scalar::new(0x0000000000000000,
+                                0x7fffffffffffffff,
+                                0xffffffffffffffff,
+                                0xffffffffffffffff,
+                                0xffffffff7ffffe18);
+        let mut c = Scalar::new(0x0000000000000000,
+                                0x0000000000000000,
+                                0x0000000000000000,
+                                0x0000000000000000,
+                                0x0000000000111111);
 
-        let p = I320::new(0x0000000000000000,
-                          0xffffffffffffffff,
-                          0xffffffffffffffff,
-                          0xffffffffffffffff,
-                          0xfffffffefffffc2f);
-
-        let res = I320::new(0x0000000000000000,
-                            0xb88b76b2b3bfffff,
+        let p = Scalar::new(0x0000000000000000,
                             0xffffffffffffffff,
                             0xffffffffffffffff,
-                            0xffffffff4774868d);
-        let res2 = I320::new(0x0000000000000000,
-                             0x0000000000000000,
-                             0x0000000000000000,
-                             0x0000000000000000,
-                             0x0000000000000002);
-        let res3 = I320::new(0x0,
-                             0x3eb0f23eb0f23eb0,
-                             0xf23eb0f23eb0f23e,
-                             0xb0f23eb0f23eb0f2,
-                             0x3eb0f23e72414b83);
+                            0xffffffffffffffff,
+                            0xfffffffefffffc2f);
+
+        let res = Scalar::new(0x0000000000000000,
+                              0xb88b76b2b3bfffff,
+                              0xffffffffffffffff,
+                              0xffffffffffffffff,
+                              0xffffffff4774868d);
+        let res2 = Scalar::from_u64(0x2);
+        let res3 = Scalar::new(0x0,
+                               0x3eb0f23eb0f23eb0,
+                               0xf23eb0f23eb0f23e,
+                               0xb0f23eb0f23eb0f2,
+                               0x3eb0f23e72414b83);
 
         a.modinv(&p);
         assert_eq!(a, res);
