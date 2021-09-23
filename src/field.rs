@@ -2,13 +2,7 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
-use crate::scalar::Scalar;
-
-const P: Scalar = Scalar::new(0x0000000000000000,
-                              0xffffffffffffffff,
-                              0xffffffffffffffff,
-                              0xffffffffffffffff,
-                              0xfffffffefffffc2f);
+use crate::scalar::{Scalar, P};
 
 /// Represent a Field Element with P = 2^256 - 2^32 - 977
 #[derive(Clone, Copy, Eq)]
@@ -44,7 +38,6 @@ impl El {
     }
 
     pub fn from_scalar(&mut self, n: &Scalar) {
-
         let d0 = n.d[0] & 0x000fffffffffffff;
         let d1 = n.d[0] >> 52 | (n.d[1] & 0x000000ffffffffff) << 12;
         let d2 = n.d[1] >> 40 | (n.d[2] & 0x000000000fffffff) << 24;
