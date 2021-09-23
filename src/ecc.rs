@@ -16,11 +16,10 @@ const G_Y: El = El::new(0x483ada7726a3c465,
 
 pub const G: Pt = Pt::new(G_X, G_Y);
 
-pub const N: Scalar = Scalar::new(0x0,
-                          0xffffffffffffffff,
-                          0xfffffffffffffffe,
-                          0xbaaedce6af48a03b,
-                          0xbfd25e8cd0364141);
+pub const N: Scalar = Scalar::new(0xffffffffffffffff,
+                                  0xfffffffffffffffe,
+                                  0xbaaedce6af48a03b,
+                                  0xbfd25e8cd0364141);
 
 #[derive(Clone, Copy, Eq)]
 pub struct Pt {

@@ -34,7 +34,7 @@ impl El {
         let d2 = (self.d[2] >> 24) | (self.d[3] << 28);
         let d3 = (self.d[3] >> 36) | (self.d[4] << 16);
 
-        Scalar::new(0, d3, d2, d1, d0)
+        Scalar::new(d3, d2, d1, d0)
     }
 
     pub fn from_scalar(&mut self, n: &Scalar) {

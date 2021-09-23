@@ -116,8 +116,7 @@ mod tests {
 
         let k = pvk.calculate_k(&z);
 
-        assert_eq!(k, Scalar::new(0,
-                                  0xc48006ba13d01330,
+        assert_eq!(k, Scalar::new(0xc48006ba13d01330,
                                   0xe9aebcbeb107b26c,
                                   0x99e8f7edbfd876c1,
                                   0xe940b9e3cd5637f7));

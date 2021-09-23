@@ -3,8 +3,7 @@ use std::fmt;
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 use std::mem;
 
-pub const P: Scalar = Scalar::new(0x0000000000000000,
-                                  0xffffffffffffffff,
+pub const P: Scalar = Scalar::new(0xffffffffffffffff,
                                   0xffffffffffffffff,
                                   0xffffffffffffffff,
                                   0xfffffffefffffc2f);
@@ -26,12 +25,12 @@ pub struct Scalar {
 }
 
 impl Scalar {
-    pub const fn new(d4: u64, d3: u64, d2: u64, d1: u64, d0: u64) -> Self {
-        Self { d: [d0, d1, d2, d3, d4] }
+    pub const fn new(d3: u64, d2: u64, d1: u64, d0: u64) -> Self {
+        Self { d: [d0, d1, d2, d3, 0] }
     }
 
     pub const fn from_u64(n: u64) -> Self {
-        Self::new(0, 0, 0, 0, n)
+        Self::new(0, 0, 0, n)
     }
 
     /// Convert bytes (big endian) to scalar
@@ -619,11 +618,9 @@ mod tests {
     fn it_div2() {
         let mut a = Scalar::new(0x0000000000000000,
                                 0x0000000000000000,
-                                0x0000000000000000,
                                 0x0000000000000100,
                                 0x0000000000000000);
         let b = Scalar::new(0x0000000000000000,
-                            0x0000000000000000,
                             0x0000000000000000,
                             0x0000000000000020,
                             0x0000000000000000);
@@ -636,23 +633,11 @@ mod tests {
 
     #[test]
     fn it_tests_ordering() {
-        let a = Scalar::new(0x8000000000000000,
-                            0x0000000000000000,
-                            0x0000000000000000,
-                            0x0000000000000000,
-                            0x0000000000000000); // -2^319
+        let a = Scalar::from_u64(0) - Scalar::from_u64(0xffffffffffffffffu64); // 0 - 2^64 + 1
 
-        let min_1 = Scalar::new(0xffffffffffffffff,
-                                0xffffffffffffffff,
-                                0xffffffffffffffff,
-                                0xffffffffffffffff,
-                                0xffffffffffffffff); // -1
+        let min_1 = Scalar::from_u64(0) - Scalar::from_u64(1); // -1
 
-        let b = Scalar::new(0x7fffffffffffffff,
-                            0xffffffffffffffff,
-                            0xffffffffffffffff,
-                            0xffffffffffffffff,
-                            0xffffffffffffffff); // 2^319 - 1
+        let b = Scalar::from_u64(0xffffffffffffffffu64); // 2^64 -1
         let n_0 = Scalar::from_u64(0);
         let n_1 = Scalar::from_u64(1);
 
@@ -686,36 +671,30 @@ mod tests {
 
     #[test]
     fn it_modinv() {
-        let mut a = Scalar::new(0x0000000000000000,
-                                0xffffffffffffffff,
+        let mut a = Scalar::new(0xffffffffffffffff,
                                 0xffffffffffffffff,
                                 0xffffffffffffffff,
                                 0xfffffbfefffffc2f);
-        let mut b = Scalar::new(0x0000000000000000,
-                                0x7fffffffffffffff,
+        let mut b = Scalar::new(0x7fffffffffffffff,
                                 0xffffffffffffffff,
                                 0xffffffffffffffff,
                                 0xffffffff7ffffe18);
         let mut c = Scalar::new(0x0000000000000000,
                                 0x0000000000000000,
                                 0x0000000000000000,
-                                0x0000000000000000,
                                 0x0000000000111111);
 
-        let p = Scalar::new(0x0000000000000000,
-                            0xffffffffffffffff,
+        let p = Scalar::new(0xffffffffffffffff,
                             0xffffffffffffffff,
                             0xffffffffffffffff,
                             0xfffffffefffffc2f);
 
-        let res = Scalar::new(0x0000000000000000,
-                              0xb88b76b2b3bfffff,
+        let res = Scalar::new(0xb88b76b2b3bfffff,
                               0xffffffffffffffff,
                               0xffffffffffffffff,
                               0xffffffff4774868d);
         let res2 = Scalar::from_u64(0x2);
-        let res3 = Scalar::new(0x0,
-                               0x3eb0f23eb0f23eb0,
+        let res3 = Scalar::new(0x3eb0f23eb0f23eb0,
                                0xf23eb0f23eb0f23e,
                                0xb0f23eb0f23eb0f2,
                                0x3eb0f23e72414b83);
@@ -732,14 +711,12 @@ mod tests {
 
     #[test]
     fn it_multiply_scalars() {
-        let mut n1 = Scalar::new(0x0000000000000000,
-                                 0xb88b76b2b3bfffff,
+        let mut n1 = Scalar::new(0xb88b76b2b3bfffff,
                                  0xffffffffffffffff,
                                  0xffffffffffffffff,
                                  0xffffffff4774868d);
         let n2 = n1;
-        let res = Scalar::new(0x0,
-                              0xdb450d7d8d367a92,
+        let res = Scalar::new(0xdb450d7d8d367a92,
                               0xca286d6fe9413357,
                               0x6f2fbc0c5131616a,
                               0x1908465a56ab3e28);
@@ -753,8 +730,7 @@ mod tests {
     fn it_multiply_scalars2() {
         let mut n1 = P;
         let n2 = n1;
-        let res = Scalar::new(0x0,
-                              0x9d671cd581c69bc5,
+        let res = Scalar::new(0x9d671cd581c69bc5,
                               0xe697f5e1d12ab7e0,
                               0xbd57efff7678bda1,
                               0x4d8f2b05a6047403);
