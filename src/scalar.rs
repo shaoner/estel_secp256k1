@@ -168,7 +168,7 @@ impl Scalar {
         }
     }
 
-    pub fn modinv(&mut self, m: &Self) {
+    pub fn modinv_inner(&mut self, m: &Self) {
         let mut b = *m;
         let mut x = Self { d: [1, 0, 0, 0, 0] };
         let mut y = Self { d: [0, 0, 0, 0, 0] };
@@ -699,13 +699,13 @@ mod tests {
                                0xb0f23eb0f23eb0f2,
                                0x3eb0f23e72414b83);
 
-        a.modinv(&p);
+        a.modinv_inner(&p);
         assert_eq!(a, res);
 
-        b.modinv(&p);
+        b.modinv_inner(&p);
         assert_eq!(b, res2);
 
-        c.modinv(&p);
+        c.modinv_inner(&p);
         assert_eq!(c, res3);
     }
 

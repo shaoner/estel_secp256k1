@@ -66,7 +66,7 @@ impl PrivateKey {
         let r = G * &k;
         let rx = r.x.to_scalar();
 
-        k.modinv(&N);
+        k.modinv_inner(&N);
 
         // s = ((z + rx * secret) / k) % N
         let s = (*z + rx.mulmod(&self.secret)).mulmod(&k);
@@ -87,7 +87,7 @@ impl PublicKey {
     pub fn verify(&self, z: &Scalar, sig: &Signature) -> bool {
         let mut s_inv = sig.s;
 
-        s_inv.modinv(&N);
+        s_inv.modinv_inner(&N);
 
         let u = z.mulmod(&s_inv);
         let v = sig.r.mulmod(&s_inv);

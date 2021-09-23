@@ -210,7 +210,7 @@ impl El {
     pub fn inverse(&mut self) {
         self.reduce();
         let mut n = self.to_scalar();
-        n.modinv(&P);
+        n.modinv_inner(&P);
         self.from_scalar(&n);
     }
 
