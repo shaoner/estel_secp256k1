@@ -1,4 +1,4 @@
-use crate::ecc::{G, N, Pt};
+use crate::ecc::{G, Pt};
 use crate::scalar::Scalar;
 use crate::hmac::{hash256, hmac256};
 
@@ -51,7 +51,7 @@ impl PrivateKey {
             v = hmac256(&k, &v);
 
             let res = Scalar::from_bytes(&v);
-            if res >= n_1 && res < N {
+            if res >= n_1 && res.get_overflow() == 0 {
                 return res;
             }
 
@@ -69,7 +69,7 @@ impl PrivateKey {
         let r = G * &k;
         let rx = r.x.to_scalar();
 
-        k.modinv_inner(&N);
+        k.modinv_inner();
 
         // s = ((z + rx * secret) / k) % N
         let s = (*z + rx.mulmod(&self.secret)).mulmod(&k);
@@ -101,7 +101,7 @@ impl PublicKey {
     pub fn verify(&self, z: &Scalar, sig: &Signature) -> bool {
         let mut s_inv = sig.s;
 
-        s_inv.modinv_inner(&N);
+        s_inv.modinv_inner();
 
         let u = z.mulmod(&s_inv);
         let v = sig.r.mulmod(&s_inv);

@@ -15,7 +15,12 @@ const SECP256K1_N_3: u64 = 0xffffffffffffffffu64;
 const SECP256K1_NI_0: u64 = 0x402da1732fc9bebfu64;
 const SECP256K1_NI_1: u64 = 0x4551231950b75fc4u64;
 
-/// Represent a i320 with support for carry
+const N: Scalar = Scalar::new(SECP256K1_N_3,
+                              SECP256K1_N_2,
+                              SECP256K1_N_1,
+                              SECP256K1_N_0);
+
+/// Represent 256 bits numbers with support for sign and carry
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Scalar {
     pub d: [u64; 5]
@@ -165,7 +170,7 @@ impl Scalar {
         }
     }
 
-    pub fn modinv_inner(&mut self, m: &Self) {
+    pub fn modinv_inner_from(&mut self, m: &Self) {
         let mut b = *m;
         let mut x = Self::from_u64(1);
         let mut y = Self::from_u64(0);
@@ -452,6 +457,10 @@ impl Scalar {
 
         res
     }
+
+    pub fn modinv_inner(&mut self) {
+        self.modinv_inner_from(&N)
+    }
 }
 
 #[cfg(debug_assertions)]
@@ -697,13 +706,13 @@ mod tests {
                                0xb0f23eb0f23eb0f2,
                                0x3eb0f23e72414b83);
 
-        a.modinv_inner(&p);
+        a.modinv_inner_from(&p);
         assert_eq!(a, res);
 
-        b.modinv_inner(&p);
+        b.modinv_inner_from(&p);
         assert_eq!(b, res2);
 
-        c.modinv_inner(&p);
+        c.modinv_inner_from(&p);
         assert_eq!(c, res3);
     }
 
@@ -726,12 +735,12 @@ mod tests {
 
     #[test]
     fn it_multiply_scalars2() {
-        let mut n1 = P;
-        let n2 = n1;
-        let res = Scalar::new(0x9d671cd581c69bc5,
-                              0xe697f5e1d12ab7e0,
-                              0xbd57efff7678bda1,
-                              0x4d8f2b05a6047403);
+        let mut n1 = N - Scalar::from_u64(0x42);
+        let n2 = N + Scalar::from_u64(0x43);
+        let res = Scalar::new(0xffffffffffffffff,
+                              0xfffffffffffffffe,
+                              0xbaaedce6af48a03b,
+                              0xbfd25e8cd0362ffb);
 
         n1.mulmod_inner(&n2);
         assert_eq!(n1, res);
