@@ -172,8 +172,8 @@ impl Scalar {
 
     pub fn modinv_inner(&mut self, m: &Self) {
         let mut b = *m;
-        let mut x = Self { d: [1, 0, 0, 0, 0] };
-        let mut y = Self { d: [0, 0, 0, 0, 0] };
+        let mut x = Self::from_u64(1);
+        let mut y = Self::from_u64(0);
 
         while !self.is_zero() {
             if self.is_even() {
