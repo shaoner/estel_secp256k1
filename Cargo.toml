@@ -1,5 +1,5 @@
 [package]
-name = "astrel_secp256k1"
+name = "estel_secp256k1"
 version = "0.1.0"
 edition = "2018"
 
