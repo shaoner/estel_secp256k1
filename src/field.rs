@@ -35,6 +35,7 @@ impl El {
         self.d[0] | self.d[1] | self.d[2] | self.d[3] | self.d[4] == 0
     }
 
+    /// Convert a field element to a scalar
     pub fn to_scalar(&self) -> Scalar {
         let d0 = (self.d[0] >> 0) | (self.d[1] << 52);
         let d1 = (self.d[1] >> 12) | (self.d[2] << 40);
@@ -44,6 +45,7 @@ impl El {
         Scalar::new(d3, d2, d1, d0)
     }
 
+    /// Assign a scalar to the current field element
     pub fn from_scalar(&mut self, n: &Scalar) {
         let d0 = n.d[0] & 0x000fffffffffffff;
         let d1 = n.d[0] >> 52 | (n.d[1] & 0x000000ffffffffff) << 12;
@@ -54,6 +56,7 @@ impl El {
         self.d = [d0, d1, d2, d3, d4];
     }
 
+    /// Multiply a field element with a small unsigned int
     pub fn mul_scalar_assign(&mut self, n: u64) {
         debug_assert!(n < 0x1000);
 
@@ -64,6 +67,7 @@ impl El {
         self.d[4] *= n;
     }
 
+    /// Multiply 2 field elements
     pub fn mul_fe_assign(&mut self, b: &Self) {
         const M52: u128 = 0x000fffffffffffffu128; // 2^52 - 1
         const M48: u64 = 0x0000ffffffffffffu64; // 2^48 - 1
@@ -141,6 +145,7 @@ impl El {
         self.d = [t0, t1, t2, t3, t4];
     }
 
+    /// Calculate the a field element square (optimized multiplication)
     pub fn square(&mut self) {
         const M52: u128 = 0x000fffffffffffffu128; // 2^52 - 1
         const M48: u64 = 0x0000ffffffffffffu64; // 2^48 - 1
@@ -214,6 +219,8 @@ impl El {
         self.d = [t0, t1, t2, t3, t4];
     }
 
+    /// Calculate the inverse of the field element
+    /// use a modular inverse with binary gcd
     pub fn inverse(&mut self) {
         self.reduce();
         let mut n = self.to_scalar();
@@ -221,6 +228,7 @@ impl El {
         self.from_scalar(&n);
     }
 
+    /// Reduce the field element by removing the carries
     pub fn reduce(&mut self) {
         const M52: u64 = 0x000fffffffffffffu64;
         const M48: u64 = 0x0000ffffffffffffu64;
