@@ -27,10 +27,12 @@ pub struct Scalar {
 }
 
 impl Scalar {
+    /// Create a new scalar with d3, d2, d1 and d0 its limbs
     pub const fn new(d3: u64, d2: u64, d1: u64, d0: u64) -> Self {
         Self { d: [d0, d1, d2, d3, 0] }
     }
 
+    /// Create a scalar from a u64
     pub const fn from_u64(n: u64) -> Self {
         Self::new(0, 0, 0, n)
     }
@@ -152,6 +154,7 @@ impl Scalar {
         self.div2()
     }
 
+    /// Normalize a scalar modulo m
     pub fn normalize(&mut self, m: &Self) {
         let s = self.d[4] >> 63;
 
@@ -170,6 +173,7 @@ impl Scalar {
         }
     }
 
+    /// Calculate the inverse of the scalar % m
     pub fn modinv_inner_from(&mut self, m: &Self) {
         let mut b = *m;
         let mut x = Self::from_u64(1);
@@ -424,6 +428,7 @@ impl Scalar {
         self.reduce(c as u32 + self.get_overflow());
     }
 
+    /// Reduce scalar % N
     pub fn reduce(&mut self, overflow: u32) {
         let mut t: u128;
 
@@ -445,12 +450,14 @@ impl Scalar {
         self.d[3] = t as u64;
     }
 
+    /// Scalar multiplication % N
     pub fn mulmod_inner(&mut self, b: &Scalar) {
         let r = self.mul512(b);
 
         self.reduce512(&r);
     }
 
+    /// Scalar multiplication % N
     pub fn mulmod(&self, b: &Scalar) -> Scalar {
         let mut res = *self;
         res.mulmod_inner(b);
@@ -458,6 +465,7 @@ impl Scalar {
         res
     }
 
+    /// Scalar inverse % N
     pub fn modinv_inner(&mut self) {
         self.modinv_inner_from(&N)
     }
