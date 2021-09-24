@@ -98,12 +98,8 @@ impl Pt {
     }
 
     pub fn mul_scalar_inner(&mut self, a: &Scalar) {
+        debug_assert_eq!(a.get_overflow(), 0);
         let mut n = *a;
-
-        if n >= N {
-            n -= N;
-        }
-
         let mut r = INFINITY;
         let mut me = *self;
 

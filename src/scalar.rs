@@ -334,7 +334,7 @@ impl Scalar {
         r
     }
 
-    fn get_overflow(&self) -> u32 {
+    pub(crate) fn get_overflow(&self) -> u32 {
         let mut yes = 0u32;
         let mut no = 0u32;
 
