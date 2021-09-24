@@ -4,7 +4,12 @@ use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 #[cfg(debug_assertions)]
 use std::fmt;
 
-use crate::scalar::{Scalar, P};
+use crate::scalar::Scalar;
+
+const P: Scalar = Scalar::new(0xffffffffffffffff,
+                              0xffffffffffffffff,
+                              0xffffffffffffffff,
+                              0xfffffffefffffc2f);
 
 /// Represent a Field Element with P = 2^256 - 2^32 - 977
 #[derive(Clone, Copy, Eq)]

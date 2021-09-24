@@ -5,11 +5,6 @@ use std::mem;
 #[cfg(debug_assertions)]
 use std::fmt;
 
-pub const P: Scalar = Scalar::new(0xffffffffffffffff,
-                                  0xffffffffffffffff,
-                                  0xffffffffffffffff,
-                                  0xfffffffefffffc2f);
-
 /// Order of the secp256k1 group
 const SECP256K1_N_0: u64 = 0xbfd25e8cd0364141u64;
 const SECP256K1_N_1: u64 = 0xbaaedce6af48a03bu64;
