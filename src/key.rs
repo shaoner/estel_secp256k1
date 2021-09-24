@@ -1,6 +1,6 @@
 use crate::ecc::{G, N, Pt};
 use crate::scalar::Scalar;
-use crate::hmac::hmac256;
+use crate::hmac::{hash256, hmac256};
 
 pub struct Signature {
     pub r: Scalar,
@@ -73,6 +73,13 @@ impl PrivateKey {
 
         Signature { r: rx, s }
     }
+
+    pub fn sign_from_buffer(&self, buf: &[u8]) -> Signature {
+        let hash = hash256(buf);
+        let z = Scalar::from_bytes(&hash);
+
+        self.sign(&z)
+    }
 }
 
 pub struct PublicKey {
@@ -95,12 +102,18 @@ impl PublicKey {
 
         sig.r == r.x.to_scalar()
     }
+
+    pub fn verify_buffer(&self, buf: &[u8], sig: &Signature) -> bool {
+        let hash = hash256(buf);
+        let z = Scalar::from_bytes(&hash);
+
+        self.verify(&z, sig)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::hmac::hash256;
 
     #[test]
     fn it_tests_k_is_deterministic() {
