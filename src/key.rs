@@ -2,11 +2,13 @@ use crate::ecc::{G, N, Pt};
 use crate::scalar::Scalar;
 use crate::hmac::{hash256, hmac256};
 
+/// ECDSA signature
 pub struct Signature {
     pub r: Scalar,
     pub s: Scalar,
 }
 
+/// Represent a private key including a secret
 pub struct PrivateKey {
     secret: Scalar,
 }
@@ -61,6 +63,7 @@ impl PrivateKey {
         }
     }
 
+    /// Create a signature from a hash
     pub fn sign(&self, z: &Scalar) -> Signature {
         let mut k = self.calculate_k(z);
         let r = G * &k;
@@ -74,6 +77,7 @@ impl PrivateKey {
         Signature { r: rx, s }
     }
 
+    /// Create a signature from a buffer
     pub fn sign_from_buffer(&self, buf: &[u8]) -> Signature {
         let hash = hash256(buf);
         let z = Scalar::from_bytes(&hash);
@@ -82,15 +86,18 @@ impl PrivateKey {
     }
 }
 
+/// Represent a public key containing an ECC point
 pub struct PublicKey {
     key: Pt
 }
 
 impl PublicKey {
+    /// Create a public key from a secret
     pub fn from_secret(secret: &Scalar) -> Self {
         Self { key: G * &secret }
     }
 
+    /// Verify that a signature is valid for a given hash
     pub fn verify(&self, z: &Scalar, sig: &Signature) -> bool {
         let mut s_inv = sig.s;
 
@@ -103,6 +110,7 @@ impl PublicKey {
         sig.r == r.x.to_scalar()
     }
 
+    /// Verify that a signature is valid for a given buffer
     pub fn verify_buffer(&self, buf: &[u8], sig: &Signature) -> bool {
         let hash = hash256(buf);
         let z = Scalar::from_bytes(&hash);
