@@ -18,6 +18,9 @@ const G_Y: El = El::new(0x483ada7726a3c465,
 
 pub const G: Pt = Pt::new(G_X, G_Y);
 
+/// Represent a point on an elliptic curve with params a = 0 and b = 7
+/// x and y are the point coordinates
+/// inf indicates if it's the point at infinity
 #[derive(Clone, Copy, Eq)]
 pub struct Pt {
     pub x: El,
@@ -36,6 +39,7 @@ impl Pt {
         Self { x, y, inf: false }
     }
 
+    /// Elliptic curve point addition
     pub fn add_inner(&mut self, rhs: &Self) {
         if self.inf {
             *self = *rhs;
