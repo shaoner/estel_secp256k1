@@ -1,5 +1,7 @@
-use std::fmt;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
+
+#[cfg(debug_assertions)]
+use std::fmt;
 
 use crate::field::El;
 use crate::scalar::Scalar;
@@ -121,6 +123,7 @@ impl Pt {
     }
 }
 
+#[cfg(debug_assertions)]
 impl fmt::Debug for Pt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.inf {

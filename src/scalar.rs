@@ -1,7 +1,9 @@
 use std::cmp::Ordering;
-use std::fmt;
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 use std::mem;
+
+#[cfg(debug_assertions)]
+use std::fmt;
 
 pub const P: Scalar = Scalar::new(0xffffffffffffffff,
                                   0xffffffffffffffff,
@@ -457,6 +459,7 @@ impl Scalar {
     }
 }
 
+#[cfg(debug_assertions)]
 impl fmt::Debug for Scalar {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "0x{:016x}{:016x}{:016x}{:016x}{:016x}",

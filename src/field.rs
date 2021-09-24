@@ -1,6 +1,8 @@
 use std::cmp::Ordering;
-use std::fmt;
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
+
+#[cfg(debug_assertions)]
+use std::fmt;
 
 use crate::scalar::{Scalar, P};
 
@@ -258,6 +260,7 @@ impl El {
     }
 }
 
+#[cfg(debug_assertions)]
 impl fmt::Debug for El {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "0x{:012x}{:013x}{:013x}{:013x}{:013x}",
