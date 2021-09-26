@@ -94,7 +94,7 @@ pub struct PublicKey {
 impl PublicKey {
     /// Create a public key from a secret
     pub fn from_secret(secret: &Scalar) -> Self {
-        Self { key: G * &secret }
+        Self { key: G * secret }
     }
 
     /// Verify that a signature is valid for a given hash

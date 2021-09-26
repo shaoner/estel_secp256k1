@@ -121,7 +121,7 @@ impl Scalar {
         b[1] = (self.d[3] >> 48) as u8;
         b[0] = (self.d[3] >> 56) as u8;
 
-        return b;
+        b
     }
 
     pub fn is_even(&self) -> bool {
@@ -348,7 +348,8 @@ impl Scalar {
         no |= (self.d[1] < SECP256K1_N_1) as u32;
         yes |= (self.d[1] > SECP256K1_N_1) as u32 & !no;
         yes |= (self.d[0] >= SECP256K1_N_0) as u32 & !no;
-        return yes;
+
+        yes
     }
 
     fn reduce512(&mut self, r: &[u64; 8]) {
