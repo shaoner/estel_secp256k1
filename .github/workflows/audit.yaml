@@ -1,0 +1,22 @@
+name: security audit
+on:
+  pull_request:
+    paths: Cargo.lock
+  schedule:
+    - cron: '0 0 * * *'
+jobs:
+  security_audit:
+    runs-on: ubuntu-20.04
+    steps:
+
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 50
+
+      - name: Run cargo audit
+        uses: actions-rs/audit-check@v1.2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
