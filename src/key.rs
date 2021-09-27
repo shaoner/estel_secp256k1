@@ -78,7 +78,7 @@ impl PrivateKey {
     }
 
     /// Create a signature from a buffer
-    pub fn sign_from_buffer(&self, buf: &[u8]) -> Signature {
+    pub fn sign_buffer(&self, buf: &[u8]) -> Signature {
         let hash = hash256(buf);
         let z = Scalar::from_bytes(&hash);
 
