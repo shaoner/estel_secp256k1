@@ -6,6 +6,7 @@ description = "ECDSA signature and verification implementation"
 keywords = ["secp256k1", "ECDSA", "crypto", "estel"]
 repository = "https://github.com/alexlren/estel_secp256k1.git"
 license = "Apache-2.0"
+readme = "README.md"
 
 [dependencies]
 sha2 = "0.9.8"
