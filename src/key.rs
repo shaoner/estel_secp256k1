@@ -142,21 +142,4 @@ mod tests {
                                   0x99e8f7edbfd876c1,
                                   0xe940b9e3cd5637f7));
     }
-
-    #[test]
-    fn it_creates_a_signature() {
-        let msg = "Hello World";
-        let password = "n00b";
-        let m = hash256(msg.as_bytes());
-        let p = hash256(password.as_bytes());
-
-        let z = Scalar::from_bytes(&m);
-        let e = Scalar::from_bytes(&p);
-
-        let pvk = PrivateKey::new(e);
-        let sig = pvk.sign(&z);
-        let pubk = PublicKey::from_secret(&e);
-
-        assert!(pubk.verify(&z, &sig));
-    }
 }
