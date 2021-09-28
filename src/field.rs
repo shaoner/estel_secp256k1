@@ -35,6 +35,10 @@ impl El {
         self.d[0] | self.d[1] | self.d[2] | self.d[3] | self.d[4] == 0
     }
 
+    pub fn is_even(&self) -> bool {
+        self.d[0] & 0x1 == 0
+    }
+
     /// Convert a field element to a scalar
     pub fn to_scalar(&self) -> Scalar {
         let d0 = (self.d[0] >> 0) | (self.d[1] << 52);
