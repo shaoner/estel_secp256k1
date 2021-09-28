@@ -116,6 +116,36 @@ impl Pt {
         }
         *self = r;
     }
+
+    pub fn serialize_sec_uncompressed(&mut self) -> [u8; 65] {
+        assert!(!self.inf);
+        self.y.reduce();
+        self.x.reduce();
+
+        let mut res = [0u8; 65];
+        let xb = self.x.to_bytes();
+        let yb = self.y.to_bytes();
+
+        res[0] = 0x04;
+        res[1..33].copy_from_slice(&xb);
+        res[33..65].copy_from_slice(&yb);
+
+        res
+    }
+
+    pub fn serialize_sec_compressed(&mut self) -> [u8; 33] {
+        assert!(!self.inf);
+        self.y.reduce();
+        self.x.reduce();
+
+        let mut res = [0u8; 33];
+        let x = self.x.to_bytes();
+
+        res[0] = if self.y.is_even() { 0x02u8 } else { 0x03u8 };
+        res[1..33].copy_from_slice(&x);
+
+        res
+    }
 }
 
 #[cfg(debug_assertions)]

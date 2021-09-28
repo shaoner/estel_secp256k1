@@ -60,6 +60,50 @@ impl El {
         self.d = [d0, d1, d2, d3, d4];
     }
 
+    /// Convert a field element to a byte array
+    pub fn to_bytes(&self) -> [u8; 32] {
+        let mut b = [0u8; 32];
+
+        b[31] = self.d[0] as u8;
+        b[30] = (self.d[0] >> 8) as u8;
+        b[29] = (self.d[0] >> 16) as u8;
+        b[28] = (self.d[0] >> 24) as u8;
+        b[27] = (self.d[0] >> 32) as u8;
+        b[26] = (self.d[0] >> 40) as u8;
+        b[25] = (self.d[0] >> 48) as u8 | (self.d[1] << 4) as u8;
+
+        b[24] = (self.d[1] >> 4) as u8;
+        b[23] = (self.d[1] >> 12) as u8;
+        b[22] = (self.d[1] >> 20) as u8;
+        b[21] = (self.d[1] >> 28) as u8;
+        b[20] = (self.d[1] >> 36) as u8;
+        b[19] = (self.d[1] >> 44) as u8;
+
+        b[18] = self.d[2] as u8;
+        b[17] = (self.d[2] >> 8) as u8;
+        b[16] = (self.d[2] >> 16) as u8;
+        b[15] = (self.d[2] >> 24) as u8;
+        b[14] = (self.d[2] >> 32) as u8;
+        b[13] = (self.d[2] >> 40) as u8;
+        b[12] = (self.d[2] >> 48) as u8 | (self.d[3] << 4) as u8;
+
+        b[11] = (self.d[3] >> 4) as u8;
+        b[10] = (self.d[3] >> 12) as u8;
+        b[9] = (self.d[3] >> 20) as u8;
+        b[8] = (self.d[3] >> 28) as u8;
+        b[7] = (self.d[3] >> 36) as u8;
+        b[6] = (self.d[3] >> 44) as u8;
+
+        b[5] = self.d[4] as u8;
+        b[4] = (self.d[4] >> 8) as u8;
+        b[3] = (self.d[4] >> 16) as u8;
+        b[2] = (self.d[4] >> 24) as u8;
+        b[1] = (self.d[4] >> 32) as u8;
+        b[0] = (self.d[4] >> 40) as u8;
+
+        b
+    }
+
     /// Multiply a field element with a small unsigned int
     pub fn mul_scalar_assign(&mut self, n: u64) {
         debug_assert!(n < 0x1000);
