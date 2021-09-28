@@ -14,6 +14,20 @@ pub struct PrivateKey {
 }
 
 impl PrivateKey {
+    /// Create a new PrivateKey from a secret number
+    ///
+    /// This is useful is you already have a hash of a password and want to
+    /// create both a private key and a public key.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use estel_secp256k1::*;
+    ///
+    /// let password = "the force".as_bytes();
+    /// let secret = Scalar::from_bytes(&hash256(&password));
+    /// let pk = PrivateKey::new(secret);
+    /// ```
     pub fn new(secret: Scalar) -> Self {
         Self { secret }
     }
@@ -64,6 +78,22 @@ impl PrivateKey {
     }
 
     /// Create a signature from a hash
+    ///
+    /// The signature can then be used to verify that:
+    /// 1/ the hash wasn't tampered
+    /// 2/ the signature belongs to the associated public key
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use estel_secp256k1::*;
+    ///
+    /// let secret = Scalar::from_bytes(&hash256("the force".as_bytes()));
+    /// let pk = PrivateKey::new(secret);
+    /// let msg = "The greatest teacher failure is".as_bytes();
+    /// let hash = Scalar::from_bytes(&hash256(&msg));
+    /// let sig = pk.sign(&hash);
+    /// ```
     pub fn sign(&self, z: &Scalar) -> Signature {
         let mut k = self.calculate_k(z);
         let r = G * &k;
@@ -78,7 +108,22 @@ impl PrivateKey {
     }
 
     /// Create a signature from a buffer
-    pub fn sign_from_buffer(&self, buf: &[u8]) -> Signature {
+    ///
+    /// The signature can then be used to verify that:
+    /// 1/ the msg (buffer) was not tampered
+    /// 2/ the signature belongs to the associated public key
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use estel_secp256k1::*;
+    ///
+    /// let secret = Scalar::from_bytes(&hash256("the force".as_bytes()));
+    /// let pk = PrivateKey::new(secret);
+    /// let msg = "The greatest teacher failure is".as_bytes();
+    /// let sig = pk.sign_buffer(&msg);
+    /// ```
+    pub fn sign_buffer(&self, buf: &[u8]) -> Signature {
         let hash = hash256(buf);
         let z = Scalar::from_bytes(&hash);
 
@@ -98,6 +143,10 @@ impl PublicKey {
     }
 
     /// Verify that a signature is valid for a given hash
+    ///
+    /// This validates that a signature was generated from the same secret used
+    /// for the public key.
+    /// It's also possible to use [`verify`] if you calculate the hash.
     pub fn verify(&self, z: &Scalar, sig: &Signature) -> bool {
         let mut s_inv = sig.s;
 
@@ -111,6 +160,10 @@ impl PublicKey {
     }
 
     /// Verify that a signature is valid for a given buffer
+    ///
+    /// This validates that a signature was generated from the same secret used
+    /// for the public key.
+    /// It's also possible to use [`verify`] if you calculate the hash.
     pub fn verify_buffer(&self, buf: &[u8], sig: &Signature) -> bool {
         let hash = hash256(buf);
         let z = Scalar::from_bytes(&hash);
@@ -141,22 +194,5 @@ mod tests {
                                   0xe9aebcbeb107b26c,
                                   0x99e8f7edbfd876c1,
                                   0xe940b9e3cd5637f7));
-    }
-
-    #[test]
-    fn it_creates_a_signature() {
-        let msg = "Hello World";
-        let password = "n00b";
-        let m = hash256(msg.as_bytes());
-        let p = hash256(password.as_bytes());
-
-        let z = Scalar::from_bytes(&m);
-        let e = Scalar::from_bytes(&p);
-
-        let pvk = PrivateKey::new(e);
-        let sig = pvk.sign(&z);
-        let pubk = PublicKey::from_secret(&e);
-
-        assert!(pubk.verify(&z, &sig));
     }
 }
