@@ -3,7 +3,9 @@ mod field;
 mod hmac;
 mod key;
 mod scalar;
+mod error;
 
+pub use crate::error::Error;
 pub use crate::hmac::hash256;
 pub use crate::key::{PrivateKey, PublicKey, Signature};
 pub use crate::scalar::Scalar;
