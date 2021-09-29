@@ -64,6 +64,46 @@ impl El {
         self.d = [d0, d1, d2, d3, d4];
     }
 
+    /// Create a field element from a 256 bits buffer
+    pub fn from_bytes(b: &[u8; 32]) -> Self {
+        let d0 = (b[31] as u64)
+            | (b[30] as u64) << 8
+            | (b[29] as u64) << 16
+            | (b[28] as u64) << 24
+            | (b[27] as u64) << 32
+            | (b[26] as u64) << 40
+            | ((b[25] & 0xf) as u64) << 48;
+        let d1 = ((b[25] >> 4) as u64)
+            | (b[24] as u64) << 4
+            | (b[23] as u64) << 12
+            | (b[22] as u64) << 20
+            | (b[21] as u64) << 28
+            | (b[20] as u64) << 36
+            | (b[19] as u64) << 44;
+        let d2 = (b[18] as u64)
+            | (b[17] as u64) << 8
+            | (b[16] as u64) << 16
+            | (b[15] as u64) << 24
+            | (b[14] as u64) << 32
+            | (b[13] as u64) << 40
+            | ((b[12] & 0xf) as u64) << 48;
+        let d3 = ((b[12] >> 4) as u64)
+            | (b[11] as u64) << 4
+            | (b[10] as u64) << 12
+            | (b[9]  as u64) << 20
+            | (b[8]  as u64) << 28
+            | (b[7]  as u64) << 36
+            | (b[6]  as u64) << 44;
+        let d4 = (b[5] as u64)
+            | (b[4] as u64) << 8
+            | (b[3] as u64) << 16
+            | (b[2] as u64) << 24
+            | (b[1] as u64) << 32
+            | (b[0] as u64) << 40;
+
+        Self { d: [d0, d1, d2, d3, d4] }
+    }
+
     /// Convert a field element to a byte array
     pub fn to_bytes(&self) -> [u8; 32] {
         let mut b = [0u8; 32];
