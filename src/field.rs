@@ -31,6 +31,10 @@ impl El {
         Self { d: [t0, t1, t2, t3, t4] }
     }
 
+    pub const fn from_u64(n: u64) -> Self {
+        Self::new(0, 0, 0, n)
+    }
+
     pub fn is_zero(&self) -> bool {
         self.d[0] | self.d[1] | self.d[2] | self.d[3] | self.d[4] == 0
     }
