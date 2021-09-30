@@ -371,6 +371,26 @@ impl El {
 
         self.d = [d0, d1, d2, d3, d4];
     }
+
+    /// Calculate (self - rhs) % P with overflow ofm
+    pub fn negate_overflow_inner(&mut self, rhs: &Self, ofm: u32) {
+        let m = ofm as u64;
+
+        self.d[0] += 0xffffefffffc2fu64 * 2 * (m + 1) - rhs.d[0];
+        self.d[1] += 0xfffffffffffffu64 * 2 * (m + 1) - rhs.d[1];
+        self.d[2] += 0xfffffffffffffu64 * 2 * (m + 1) - rhs.d[2];
+        self.d[3] += 0xfffffffffffffu64 * 2 * (m + 1) - rhs.d[3];
+        self.d[4] += 0x0ffffffffffffu64 * 2 * (m + 1) - rhs.d[4];
+    }
+
+
+    /// Calculate (-self) % P with overflow ofm
+    pub fn negate(&self, ofm: u32) -> Self {
+        let mut r = El::from_u64(0);
+        r.negate_overflow_inner(self, ofm);
+
+        r
+    }
 }
 
 #[cfg(debug_assertions)]
@@ -502,11 +522,7 @@ impl<'a, 'b> Sub<&'a El> for &'b El {
 impl<'a> SubAssign<&'a El> for El {
     fn sub_assign(&mut self, rhs: &'a El) {
         // r = r + (-a)
-        self.d[0] += 0xffffefffffc2fu64 * 2 - rhs.d[0];
-        self.d[1] += 0xfffffffffffffu64 * 2 - rhs.d[1];
-        self.d[2] += 0xfffffffffffffu64 * 2 - rhs.d[2];
-        self.d[3] += 0xfffffffffffffu64 * 2 - rhs.d[3];
-        self.d[4] += 0x0ffffffffffffu64 * 2 - rhs.d[4];
+        self.negate_overflow_inner(rhs, 0);
     }
 }
 
