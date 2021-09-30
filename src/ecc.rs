@@ -1,9 +1,11 @@
+use std::convert::TryInto;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[cfg(debug_assertions)]
 use std::fmt;
 
 use crate::field::El;
+use crate::error::Error;
 use crate::scalar::Scalar;
 
 const G_X: El = El::new(0x79be667ef9dcbbac,
@@ -17,6 +19,8 @@ const G_Y: El = El::new(0x483ada7726a3c465,
                         0x9c47d08ffb10d4b8);
 
 pub const G: Pt = Pt::new(G_X, G_Y);
+
+const SECP256K1_B: u64 = 7;
 
 /// Represent a point on an elliptic curve with params a = 0 and b = 7
 /// x and y are the point coordinates
@@ -142,6 +146,49 @@ impl Pt {
         res[1..33].copy_from_slice(&x);
 
         res
+    }
+
+    pub fn parse_sec(bin: &[u8]) -> Result<Self, Error> {
+        let xbin: [u8; 32] = bin[1..33].try_into().or(Err(Error::InvalidBuffer))?;
+
+        if bin[0] == 0x04 {
+            // uncompressed
+            let ybin: [u8; 32] = bin[33..65].try_into().or(Err(Error::InvalidBuffer))?;
+
+            let x = El::from_bytes(&xbin);
+            let y = El::from_bytes(&ybin);
+
+            Ok(Self::new(x, y))
+        } else {
+            // compressed
+            // y^2 = x^3 + 7
+            // -> y_1 = (x^3 + 7).sqrt()
+            // -> y_2 = P - y_1
+            let is_even = bin[0] == 0x02;
+
+            let x = El::from_bytes(&xbin);
+            let x3 = x.square() * x;
+            let y2 = x3 + El::from_u64(SECP256K1_B);
+            let (_y, is_valid) = y2.sqrt();
+
+            if !is_valid {
+                return Err(Error::InvalidBuffer);
+            }
+
+            if _y.is_even() {
+                if is_even {
+                    Ok(Self::new(x, _y))
+                } else {
+                    Ok(Self::new(x, _y.negate(1)))
+                }
+            } else {
+                if is_even {
+                    Ok(Self::new(x, _y.negate(1)))
+                } else {
+                    Ok(Self::new(x, _y))
+                }
+            }
+        }
     }
 }
 
@@ -277,5 +324,26 @@ mod tests {
         p.mul_scalar_inner(&a);
 
         assert_eq!(p, res);
+    }
+
+    #[test]
+    fn it_checks_serialization() {
+        let mut p = Pt::new(El::new(0x8b4b5f165df3c2be,
+                                    0x8c6244b5b7456388,
+                                    0x43e4a781a15bcd1b,
+                                    0x69f79a55dffdf80c),
+                            El::new(0x4aad0a6f68d308b4,
+                                    0xb3fbd7813ab0da04,
+                                    0xf9e336546162ee56,
+                                    0xb3eff0c65fd4fd36));
+
+        let sec_compressed = p.serialize_sec_compressed();
+        let sec_uncompressed = p.serialize_sec_uncompressed();
+
+        let p1 = Pt::parse_sec(&sec_uncompressed).unwrap();
+        let p2 = Pt::parse_sec(&sec_compressed).unwrap();
+
+        assert_eq!(p, p1);
+        assert_eq!(p, p2);
     }
 }
