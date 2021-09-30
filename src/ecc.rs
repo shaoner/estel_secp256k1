@@ -65,25 +65,22 @@ impl Pt {
             s = (self.y - rhs.y) * _x;
             s.reduce();
 
-            let mut s2 = s;
-            s2.square();
+            let mut s2 = s.square();
             s2.reduce();
             x3 = s2 - self.x - rhs.x;
             x3.reduce();
         } else {
             // s = (3x^2 + a) / 2y
             // x3 = s^2 - 2x
-            let mut t2 = self.x;
+            let mut t2 = self.x.square();
             let mut _2y = self.y * 0x2u64;
             _2y.inverse();
-            t2.square();
             t2 *= 0x3u64;
             t2.reduce();
             s = t2 * _2y;
             s.reduce();
 
-            let mut s2 = s;
-            s2.square();
+            let mut s2 = s.square();
             s2.reduce();
             x3 = s2 - self.x * 0x2u64;
             x3.reduce();

@@ -237,8 +237,16 @@ impl El {
         self.d = [t0, t1, t2, t3, t4];
     }
 
-    /// Calculate the a field element square (optimized multiplication)
-    pub fn square(&mut self) {
+    /// Calculate the field element square
+    pub fn square(&self) -> Self {
+        let mut r = *self;
+
+        r.square_inner();
+        r
+    }
+
+    /// Calculate the field element square in place (optimized multiplication)
+    pub fn square_inner(&mut self) {
         const M52: u128 = 0x000fffffffffffffu128; // 2^52 - 1
         const M48: u64 = 0x0000ffffffffffffu64; // 2^48 - 1
         const P0: u128 = 0x1000003d1u128; // 2^32 + 977
@@ -631,7 +639,7 @@ mod tests {
             0xfffffffeffffec2fu64,
         );
 
-        a.square();
+        a.square_inner();
         a.reduce();
         // r = ((p - 1000)^2) % p
         let expected = El::new(
