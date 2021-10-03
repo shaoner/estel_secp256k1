@@ -288,7 +288,7 @@ mod tests {
             ),
         };
 
-        let sigbin = sig.serialize_der();
+        let (bin, _) = sig.serialize_der();
 
         let exp = [
             0x30, 0x46, 0x02, 0x21, 0x00, 0xe4, 0x5a, 0x15, 0x0a, 0x8e, 0xaf, 0xef, 0x6f, 0x5a,
@@ -298,6 +298,58 @@ mod tests {
             0xfa, 0xc2, 0x11, 0xcc, 0x4a, 0x84, 0x2a, 0x2e, 0x90, 0x65, 0x62, 0xf2, 0x86, 0xa4,
             0x62, 0x55,
         ];
-        assert_eq!(sigbin, exp);
+        assert_eq!(bin, exp);
+    }
+
+    #[test]
+    fn it_parses_serialized_signature() {
+        let sig = Signature {
+            r: Scalar::new(
+                0xe45a150a8eafef6f,
+                0x5a3dfef6d3728674,
+                0x92eb9d31e3ffb254,
+                0x013767c71e093276
+            ),
+            s: Scalar::new(
+                0xb73a3f6c5b200750,
+                0x4a36806a5f7f4ff9,
+                0xfac211cc4a842a2e,
+                0x906562f286a46255,
+            ),
+        };
+
+        let (bin, len) = sig.serialize_der();
+        let exp = Signature::parse_der(&bin[..len]).unwrap();
+
+        assert_eq!(exp, sig);
+    }
+
+    #[test]
+    fn it_cannot_parse_signature() {
+        let sig = Signature {
+            r: Scalar::new(
+                0xe45a150a8eafef6f,
+                0x5a3dfef6d3728674,
+                0x92eb9d31e3ffb254,
+                0x013767c71e093276
+            ),
+            s: Scalar::new(
+                0xb73a3f6c5b200750,
+                0x4a36806a5f7f4ff9,
+                0xfac211cc4a842a2e,
+                0x906562f286a46255,
+            ),
+        };
+
+        let (bin, len) = sig.serialize_der();
+        let exp = Signature::parse_der(&bin[1..len]).unwrap_err();
+        assert_eq!(exp, Error::InvalidBuffer);
+
+        let exp = Signature::parse_der(&bin[0..10]).unwrap_err();
+        assert_eq!(exp, Error::InvalidBuffer);
+
+        let bin = [0u8; 72];
+        let exp = Signature::parse_der(&bin[0..72]).unwrap_err();
+        assert_eq!(exp, Error::InvalidBuffer);
     }
 }
