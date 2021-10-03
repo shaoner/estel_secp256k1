@@ -1,8 +1,10 @@
 use crate::ecc::{G, Pt};
+use crate::error::Error;
 use crate::scalar::Scalar;
 use crate::hmac::{hash256, hmac256};
 
 /// ECDSA signature
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Signature {
     pub r: Scalar,
     pub s: Scalar,
@@ -43,6 +45,41 @@ impl Signature {
         res[1] = len as u8;
 
         (res, len + 2)
+    }
+
+    pub fn parse_der(bin: &[u8]) -> Result<Self, Error> {
+        fn parse_scalar(bin: &[u8], len: usize) -> Result<Scalar, Error> {
+            let mut b = [0u8; 32];
+            let start = if bin[0] == 0x0 { 1 } else { 0 };
+            if len > (32 + start) {
+                return Err(Error::InvalidBuffer);
+            }
+            b[(32 + start - len)..32].copy_from_slice(&bin[start..len]);
+
+            Ok(Scalar::from_bytes(&b))
+        }
+        if bin.len() < 6 {
+            return Err(Error::InvalidBuffer);
+        }
+        let tlen = bin[1] as usize;
+        if bin.len() != (tlen + 2) || bin[0] != 0x30 || bin[2] != 0x02 {
+            return Err(Error::InvalidBuffer);
+        }
+        let rlen = bin[3] as usize;
+        if bin.len() < (rlen + 6) {
+            return Err(Error::InvalidBuffer);
+        }
+        let r = parse_scalar(&bin[4..(4 + rlen)], rlen)?;
+        if bin[4 + rlen] != 0x02 {
+            return Err(Error::InvalidBuffer);
+        }
+        let slen = bin[5 + rlen] as usize;
+        if (rlen + slen + 4) != tlen {
+            return Err(Error::InvalidBuffer);
+        }
+        let s = parse_scalar(&bin[(6 + rlen)..(6 + rlen + slen)], slen)?;
+
+        Ok(Signature { r, s })
     }
 }
 
