@@ -1,14 +1,16 @@
 mod ecc;
+mod error;
 mod field;
 mod hmac;
 mod key;
 mod scalar;
-mod error;
+mod sig;
 
 pub use crate::error::Error;
 pub use crate::hmac::hash256;
-pub use crate::key::{PrivateKey, PublicKey, Signature};
+pub use crate::key::{PrivateKey, PublicKey};
 pub use crate::scalar::Scalar;
+pub use crate::sig::Signature;
 
 /// Create a keypair from a buffer seed
 ///
