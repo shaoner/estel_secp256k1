@@ -31,8 +31,16 @@ impl El {
         Self { d: [t0, t1, t2, t3, t4] }
     }
 
+    pub const fn from_u64(n: u64) -> Self {
+        Self::new(0, 0, 0, n)
+    }
+
     pub fn is_zero(&self) -> bool {
         self.d[0] | self.d[1] | self.d[2] | self.d[3] | self.d[4] == 0
+    }
+
+    pub fn is_even(&self) -> bool {
+        self.d[0] & 0x1 == 0
     }
 
     /// Convert a field element to a scalar
@@ -54,6 +62,90 @@ impl El {
         let d4 = n.d[3] >> 16;
 
         self.d = [d0, d1, d2, d3, d4];
+    }
+
+    /// Create a field element from a 256 bits buffer
+    pub fn from_bytes(b: &[u8; 32]) -> Self {
+        let d0 = (b[31] as u64)
+            | (b[30] as u64) << 8
+            | (b[29] as u64) << 16
+            | (b[28] as u64) << 24
+            | (b[27] as u64) << 32
+            | (b[26] as u64) << 40
+            | ((b[25] & 0xf) as u64) << 48;
+        let d1 = ((b[25] >> 4) as u64)
+            | (b[24] as u64) << 4
+            | (b[23] as u64) << 12
+            | (b[22] as u64) << 20
+            | (b[21] as u64) << 28
+            | (b[20] as u64) << 36
+            | (b[19] as u64) << 44;
+        let d2 = (b[18] as u64)
+            | (b[17] as u64) << 8
+            | (b[16] as u64) << 16
+            | (b[15] as u64) << 24
+            | (b[14] as u64) << 32
+            | (b[13] as u64) << 40
+            | ((b[12] & 0xf) as u64) << 48;
+        let d3 = ((b[12] >> 4) as u64)
+            | (b[11] as u64) << 4
+            | (b[10] as u64) << 12
+            | (b[9]  as u64) << 20
+            | (b[8]  as u64) << 28
+            | (b[7]  as u64) << 36
+            | (b[6]  as u64) << 44;
+        let d4 = (b[5] as u64)
+            | (b[4] as u64) << 8
+            | (b[3] as u64) << 16
+            | (b[2] as u64) << 24
+            | (b[1] as u64) << 32
+            | (b[0] as u64) << 40;
+
+        Self { d: [d0, d1, d2, d3, d4] }
+    }
+
+    /// Convert a field element to a byte array
+    pub fn to_bytes(&self) -> [u8; 32] {
+        let mut b = [0u8; 32];
+
+        b[31] = self.d[0] as u8;
+        b[30] = (self.d[0] >> 8) as u8;
+        b[29] = (self.d[0] >> 16) as u8;
+        b[28] = (self.d[0] >> 24) as u8;
+        b[27] = (self.d[0] >> 32) as u8;
+        b[26] = (self.d[0] >> 40) as u8;
+        b[25] = (self.d[0] >> 48) as u8 | (self.d[1] << 4) as u8;
+
+        b[24] = (self.d[1] >> 4) as u8;
+        b[23] = (self.d[1] >> 12) as u8;
+        b[22] = (self.d[1] >> 20) as u8;
+        b[21] = (self.d[1] >> 28) as u8;
+        b[20] = (self.d[1] >> 36) as u8;
+        b[19] = (self.d[1] >> 44) as u8;
+
+        b[18] = self.d[2] as u8;
+        b[17] = (self.d[2] >> 8) as u8;
+        b[16] = (self.d[2] >> 16) as u8;
+        b[15] = (self.d[2] >> 24) as u8;
+        b[14] = (self.d[2] >> 32) as u8;
+        b[13] = (self.d[2] >> 40) as u8;
+        b[12] = (self.d[2] >> 48) as u8 | (self.d[3] << 4) as u8;
+
+        b[11] = (self.d[3] >> 4) as u8;
+        b[10] = (self.d[3] >> 12) as u8;
+        b[9] = (self.d[3] >> 20) as u8;
+        b[8] = (self.d[3] >> 28) as u8;
+        b[7] = (self.d[3] >> 36) as u8;
+        b[6] = (self.d[3] >> 44) as u8;
+
+        b[5] = self.d[4] as u8;
+        b[4] = (self.d[4] >> 8) as u8;
+        b[3] = (self.d[4] >> 16) as u8;
+        b[2] = (self.d[4] >> 24) as u8;
+        b[1] = (self.d[4] >> 32) as u8;
+        b[0] = (self.d[4] >> 40) as u8;
+
+        b
     }
 
     /// Multiply a field element with a small unsigned int
@@ -145,8 +237,16 @@ impl El {
         self.d = [t0, t1, t2, t3, t4];
     }
 
-    /// Calculate the a field element square (optimized multiplication)
-    pub fn square(&mut self) {
+    /// Calculate the field element square
+    pub fn square(&self) -> Self {
+        let mut r = *self;
+
+        r.square_inner();
+        r
+    }
+
+    /// Calculate the field element square in place (optimized multiplication)
+    pub fn square_inner(&mut self) {
         const M52: u128 = 0x000fffffffffffffu128; // 2^52 - 1
         const M48: u64 = 0x0000ffffffffffffu64; // 2^48 - 1
         const P0: u128 = 0x1000003d1u128; // 2^32 + 977
@@ -219,6 +319,108 @@ impl El {
         self.d = [t0, t1, t2, t3, t4];
     }
 
+    /// Calculate the square root of the current field element
+    ///
+    /// x.sqrt() is equivalent to x^( (P + 1) / 4)
+    /// Using the bitcoin trick, the binary representation of (P + 1) / 4 is 3 groups of 1's
+    /// [1; 223], [0; 1], [22; 1], [0; 4], [2; 1], [0; 2]
+    ///
+    /// Using some squaring and multiplication we can do:
+    /// x^((2^n - 1).(2^m) + (2^m - 1)) = x^(2^(n+m) - 1)
+    pub fn sqrt(&self) -> (Self, bool) {
+        // xN = x^(2^N - 1)
+
+        // x^(2 - 1)
+        let mut x2 = self.square();
+        x2 *= self;
+
+        // x^(2^3 - 1) = x^((2^2 - 1).(2^1) + 1)
+        let mut x3 = x2.square();
+        x3 *= self;
+
+        // x^(2^6 - 1) = x^((2^3 - 1).(2^3) + (2^3 - 1))
+        let mut x6 = x3;
+        for _ in 0..3 {
+            x6 = x6.square();
+        }
+        x6 *= &x3;
+
+        // x^(2^9 - 1) = x^((2^6 - 1).(2^3) + (2^3 - 1))
+        let mut x9 = x6;
+        for _ in 0..3 {
+            x9 = x9.square();
+        }
+        x9 *= &x3;
+
+        // x^(2^11 - 1) = x^((2^9 - 1).(2^2) + (2^2 - 1))
+        let mut x11 = x9;
+        for _ in 0..2 {
+            x11 = x11.square();
+        }
+        x11 *= &x2;
+
+        // x^(2^22 - 1) = x^((2^176 - 1).(2^11) + (2^11 - 1)
+        let mut x22 = x11;
+        for _ in 0..11 {
+            x22 = x22.square();
+        }
+        x22 *= &x11;
+
+        // x^(2^44 - 1) = x^((2^22 - 1).(2^22) + (2^22 - 1))
+        let mut x44 = x22;
+        for _ in 0..22 {
+            x44 = x44.square();
+        }
+        x44 *= &x22;
+
+        // x^(2^88 - 1) = x^((2^44 - 1).(2^44) + (2^44 - 1))
+        let mut x88 = x44;
+        for _ in 0..44 {
+            x88 = x88.square();
+        }
+        x88 *= &x44;
+
+        // x^(2^176 - 1) = x^((2^88 - 1).(2^88) + (2^88 - 1))
+        let mut x176 = x88;
+        for _ in 0..88 {
+            x176 = x176.square();
+        }
+        x176 *= &x88;
+
+        // x^(2^220 - 1) = x^((2^176 - 1).(2^44) + (2^44 - 1))
+        let mut x220 = x176;
+        for _ in 0..44 {
+            x220 = x220.square();
+        }
+        x220 *= &x44;
+
+        // x^(2^223 - 1) = x^((2^220 - 1).(2^3) + (2^3 - 1))
+        let mut x223 = x220;
+        for _ in 0..3 {
+            x223 = x223.square();
+        }
+        x223 *= &x3;
+
+        // t1 = x^(2^223 - 1) << 23
+        let mut t1 = x223;
+        for _ in 0..23 {
+            t1 = t1.square();
+        }
+        // t1 = t1 | x^(2^22 - 1) << 6
+        t1 *= &x22;
+        for _ in 0..6 {
+            t1 = t1.square();
+        }
+        // t1 = t1 | x^(2^2 - 1) << 2
+        t1 *= &x2;
+        t1 = t1.square();
+        let r = t1.square();
+
+        // Check r^2 = x and not -x
+        t1 = r.square();
+        (r, &t1 == self)
+    }
+
     /// Calculate the inverse of the field element
     /// use a modular inverse with binary gcd
     pub fn inverse(&mut self) {
@@ -270,6 +472,26 @@ impl El {
         }
 
         self.d = [d0, d1, d2, d3, d4];
+    }
+
+    /// Calculate (self - rhs) % P with overflow ofm
+    pub fn negate_overflow_inner(&mut self, rhs: &Self, ofm: u32) {
+        let m = ofm as u64;
+
+        self.d[0] += 0xffffefffffc2fu64 * 2 * (m + 1) - rhs.d[0];
+        self.d[1] += 0xfffffffffffffu64 * 2 * (m + 1) - rhs.d[1];
+        self.d[2] += 0xfffffffffffffu64 * 2 * (m + 1) - rhs.d[2];
+        self.d[3] += 0xfffffffffffffu64 * 2 * (m + 1) - rhs.d[3];
+        self.d[4] += 0x0ffffffffffffu64 * 2 * (m + 1) - rhs.d[4];
+    }
+
+
+    /// Calculate (-self) % P with overflow ofm
+    pub fn negate(&self, ofm: u32) -> Self {
+        let mut r = El::from_u64(0);
+        r.negate_overflow_inner(self, ofm);
+
+        r
     }
 }
 
@@ -402,11 +624,7 @@ impl<'a, 'b> Sub<&'a El> for &'b El {
 impl<'a> SubAssign<&'a El> for El {
     fn sub_assign(&mut self, rhs: &'a El) {
         // r = r + (-a)
-        self.d[0] += 0xffffefffffc2fu64 * 2 - rhs.d[0];
-        self.d[1] += 0xfffffffffffffu64 * 2 - rhs.d[1];
-        self.d[2] += 0xfffffffffffffu64 * 2 - rhs.d[2];
-        self.d[3] += 0xfffffffffffffu64 * 2 - rhs.d[3];
-        self.d[4] += 0x0ffffffffffffu64 * 2 - rhs.d[4];
+        self.negate_overflow_inner(rhs, 0);
     }
 }
 
@@ -539,7 +757,7 @@ mod tests {
             0xfffffffeffffec2fu64,
         );
 
-        a.square();
+        a.square_inner();
         a.reduce();
         // r = ((p - 1000)^2) % p
         let expected = El::new(
