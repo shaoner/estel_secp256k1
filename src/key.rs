@@ -1,5 +1,8 @@
-use crate::ecc::{G, Pt};
+use std::convert::TryInto;
+
+use crate::ecc::{G, Pt, SECP256K1_B};
 use crate::error::Error;
+use crate::field::El;
 use crate::scalar::Scalar;
 use crate::hmac::{hash256, hmac256};
 
@@ -207,6 +210,7 @@ impl PrivateKey {
 }
 
 /// Represent a public key containing an ECC point
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct PublicKey {
     key: Pt
 }
@@ -215,6 +219,11 @@ impl PublicKey {
     /// Create a public key from a secret
     pub fn from_secret(secret: &Scalar) -> Self {
         Self { key: G * secret }
+    }
+
+    /// Create a public key from ECC coordinates x and y
+    pub const fn from_coords(x: El, y: El) -> Self {
+        Self { key: Pt::new(x, y) }
     }
 
     /// Verify that a signature is valid for a given hash
@@ -244,6 +253,83 @@ impl PublicKey {
         let z = Scalar::from_bytes(&hash);
 
         self.verify(&z, sig)
+    }
+
+    pub fn serialize_sec_uncompressed(&mut self) -> [u8; 65] {
+        let mut key = self.key;
+        assert!(!key.inf);
+
+        key.y.reduce();
+        key.x.reduce();
+
+        let mut res = [0u8; 65];
+        let xb = key.x.to_bytes();
+        let yb = key.y.to_bytes();
+
+        res[0] = 0x04;
+        res[1..33].copy_from_slice(&xb);
+        res[33..65].copy_from_slice(&yb);
+
+        res
+    }
+
+    pub fn serialize_sec_compressed(&mut self) -> [u8; 33] {
+        let mut key = self.key;
+
+        assert!(!key.inf);
+        key.y.reduce();
+        key.x.reduce();
+
+        let mut res = [0u8; 33];
+        let x = key.x.to_bytes();
+
+        res[0] = if key.y.is_even() { 0x02u8 } else { 0x03u8 };
+        res[1..33].copy_from_slice(&x);
+
+        res
+    }
+
+    pub fn parse_sec(bin: &[u8]) -> Result<Self, Error> {
+        let xbin: [u8; 32] = bin[1..33].try_into().or(Err(Error::InvalidBuffer))?;
+
+        if bin[0] == 0x04 {
+            // uncompressed
+            let ybin: [u8; 32] = bin[33..65].try_into().or(Err(Error::InvalidBuffer))?;
+
+            let x = El::from_bytes(&xbin);
+            let y = El::from_bytes(&ybin);
+
+            Ok(Self::from_coords(x, y))
+        } else {
+            // compressed
+            // y^2 = x^3 + 7
+            // -> y_1 = (x^3 + 7).sqrt()
+            // -> y_2 = P - y_1
+            let is_even = bin[0] == 0x02;
+
+            let x = El::from_bytes(&xbin);
+            let x3 = x.square() * x;
+            let y2 = x3 + El::from_u64(SECP256K1_B);
+            let (_y, is_valid) = y2.sqrt();
+
+            if !is_valid {
+                return Err(Error::InvalidBuffer);
+            }
+
+            if _y.is_even() {
+                if is_even {
+                    Ok(Self::from_coords(x, _y))
+                } else {
+                    Ok(Self::from_coords(x, _y.negate(1)))
+                }
+            } else {
+                if is_even {
+                    Ok(Self::from_coords(x, _y.negate(1)))
+                } else {
+                    Ok(Self::from_coords(x, _y))
+                }
+            }
+        }
     }
 }
 
@@ -351,5 +437,29 @@ mod tests {
         let bin = [0u8; 72];
         let exp = Signature::parse_der(&bin[0..72]).unwrap_err();
         assert_eq!(exp, Error::InvalidBuffer);
+    }
+
+
+    #[test]
+    fn it_checks_public_key_serialization() {
+        let mut p = PublicKey::from_coords(
+            El::new(0x8b4b5f165df3c2be,
+                    0x8c6244b5b7456388,
+                    0x43e4a781a15bcd1b,
+                    0x69f79a55dffdf80c),
+            El::new(0x4aad0a6f68d308b4,
+                    0xb3fbd7813ab0da04,
+                    0xf9e336546162ee56,
+                    0xb3eff0c65fd4fd36)
+        );
+
+        let sec_compressed = p.serialize_sec_compressed();
+        let sec_uncompressed = p.serialize_sec_uncompressed();
+
+        let p1 = PublicKey::parse_sec(&sec_uncompressed).unwrap();
+        let p2 = PublicKey::parse_sec(&sec_compressed).unwrap();
+
+        assert_eq!(p, p1);
+        assert_eq!(p, p2);
     }
 }
