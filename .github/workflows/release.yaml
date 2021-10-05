@@ -70,6 +70,6 @@ jobs:
       - name: Install requirements
         run: pip install toml
       - name: Set version in Cargo.toml
-        run: ./scripts/set_version.py Cargo.toml ${{ steps.get_version.outputs.VERSION }}
+        run: ./.github/workflows/set_version.py Cargo.toml ${{ steps.get_version.outputs.VERSION }}
       - name: Publish
         run: cargo publish --token ${{ secrets.CARGO_TOKEN }} --allow-dirty
