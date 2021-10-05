@@ -1,6 +1,6 @@
 use std::convert::TryInto;
 
-use crate::ecc::{G, Pt, SECP256K1_B};
+use crate::ecc::{Pt, G, SECP256K1_B};
 use crate::error::Error;
 use crate::field::El;
 use crate::hmac::{hash256, hmac256};
@@ -133,7 +133,7 @@ impl PrivateKey {
 /// Represent a public key containing an ECC point
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct PublicKey {
-    key: Pt
+    key: Pt,
 }
 
 impl PublicKey {
@@ -272,23 +272,32 @@ mod tests {
 
         let k = pvk.calculate_k(&z);
 
-        assert_eq!(k, Scalar::new(0xc48006ba13d01330,
-                                  0xe9aebcbeb107b26c,
-                                  0x99e8f7edbfd876c1,
-                                  0xe940b9e3cd5637f7));
+        assert_eq!(
+            k,
+            Scalar::new(
+                0xc48006ba13d01330,
+                0xe9aebcbeb107b26c,
+                0x99e8f7edbfd876c1,
+                0xe940b9e3cd5637f7
+            )
+        );
     }
 
     #[test]
     fn it_checks_public_key_serialization() {
         let mut p = PublicKey::from_coords(
-            El::new(0x8b4b5f165df3c2be,
-                    0x8c6244b5b7456388,
-                    0x43e4a781a15bcd1b,
-                    0x69f79a55dffdf80c),
-            El::new(0x4aad0a6f68d308b4,
-                    0xb3fbd7813ab0da04,
-                    0xf9e336546162ee56,
-                    0xb3eff0c65fd4fd36)
+            El::new(
+                0x8b4b5f165df3c2be,
+                0x8c6244b5b7456388,
+                0x43e4a781a15bcd1b,
+                0x69f79a55dffdf80c,
+            ),
+            El::new(
+                0x4aad0a6f68d308b4,
+                0xb3fbd7813ab0da04,
+                0xf9e336546162ee56,
+                0xb3eff0c65fd4fd36,
+            ),
         );
 
         let sec_compressed = p.serialize_sec_compressed();
