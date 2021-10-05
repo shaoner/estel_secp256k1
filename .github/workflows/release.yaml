@@ -9,13 +9,6 @@ env:
   TOOLCHAIN_VERSION: 1.55.0
 
 jobs:
-  lint:
-    name: Lint 
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: cargo clippy
-        run: ./lint.sh
   build:
     name: Build 
     runs-on: ubuntu-20.04
@@ -48,7 +41,7 @@ jobs:
         run: cargo test --all-targets
   publish:
     runs-on: ubuntu-20.04
-    needs: [lint, build]
+    needs: build
     if: startswith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v2
