@@ -92,7 +92,7 @@ mod tests {
                 0xe45a150a8eafef6f,
                 0x5a3dfef6d3728674,
                 0x92eb9d31e3ffb254,
-                0x013767c71e093276
+                0x013767c71e093276,
             ),
             s: Scalar::new(
                 0xb73a3f6c5b200750,
@@ -122,7 +122,7 @@ mod tests {
                 0xe45a150a8eafef6f,
                 0x5a3dfef6d3728674,
                 0x92eb9d31e3ffb254,
-                0x013767c71e093276
+                0x013767c71e093276,
             ),
             s: Scalar::new(
                 0xb73a3f6c5b200750,
@@ -145,7 +145,7 @@ mod tests {
                 0xe45a150a8eafef6f,
                 0x5a3dfef6d3728674,
                 0x92eb9d31e3ffb254,
-                0x013767c71e093276
+                0x013767c71e093276,
             ),
             s: Scalar::new(
                 0xb73a3f6c5b200750,

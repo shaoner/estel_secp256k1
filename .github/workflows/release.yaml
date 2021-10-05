@@ -5,19 +5,34 @@ on:
     tags:
       - v*.*.*
 
+env:
+  TOOLCHAIN_VERSION: 1.55.0
+
 jobs:
-  lint:
-    name: Lint 
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: cargo clippy
-        run: ./lint.sh
   build:
     name: Build 
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        id: toolchain
+        with:
+          path: |
+            ~/.cargo/bin/
+          key: ${{ runner.os }}-cargo-${{ env.TOOLCHAIN_VERSION }}
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-deps-${{ hashFiles('**/Cargo.toml') }}
+      - uses: actions-rs/toolchain@v1.0.6
+        if: steps.toolchain.outputs.cache-hit != 'true'
+        with:
+          toolchain: ${{ env.TOOLCHAIN_VERSION }}
+          override: true
       - name: Build
         run: cargo build
       - name: Build examples
@@ -26,16 +41,35 @@ jobs:
         run: cargo test --all-targets
   publish:
     runs-on: ubuntu-20.04
-    needs: [lint, build]
+    needs: build
     if: startswith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        id: toolchain
+        with:
+          path: |
+            ~/.cargo/bin/
+          key: ${{ runner.os }}-cargo-${{ env.TOOLCHAIN_VERSION }}
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-deps-${{ hashFiles('**/Cargo.toml') }}
+      - uses: actions-rs/toolchain@v1.0.6
+        if: steps.toolchain.outputs.cache-hit != 'true'
+        with:
+          toolchain: ${{ env.TOOLCHAIN_VERSION }}
+          override: true
       - name: Get the version
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
       - name: Install requirements
         run: pip install toml
       - name: Set version in Cargo.toml
-        run: ./scripts/set_version.py Cargo.toml ${{ steps.get_version.outputs.VERSION }}
+        run: ./.github/workflows/set_version.py Cargo.toml ${{ steps.get_version.outputs.VERSION }}
       - name: Publish
         run: cargo publish --token ${{ secrets.CARGO_TOKEN }} --allow-dirty

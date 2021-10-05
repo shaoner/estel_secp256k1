@@ -6,15 +6,19 @@ use std::fmt;
 use crate::field::El;
 use crate::scalar::Scalar;
 
-const G_X: El = El::new(0x79be667ef9dcbbac,
-                        0x55a06295ce870b07,
-                        0x029bfcdb2dce28d9,
-                        0x59f2815b16f81798);
+const G_X: El = El::new(
+    0x79be667ef9dcbbac,
+    0x55a06295ce870b07,
+    0x029bfcdb2dce28d9,
+    0x59f2815b16f81798,
+);
 
-const G_Y: El = El::new(0x483ada7726a3c465,
-                        0x5da4fbfc0e1108a8,
-                        0xfd17b448a6855419,
-                        0x9c47d08ffb10d4b8);
+const G_Y: El = El::new(
+    0x483ada7726a3c465,
+    0x5da4fbfc0e1108a8,
+    0xfd17b448a6855419,
+    0x9c47d08ffb10d4b8,
+);
 
 pub const G: Pt = Pt::new(G_X, G_Y);
 
@@ -27,7 +31,7 @@ pub const SECP256K1_B: u64 = 7;
 pub struct Pt {
     pub x: El,
     pub y: El,
-    pub inf: bool
+    pub inf: bool,
 }
 
 pub const INFINITY: Pt = Pt {
@@ -202,29 +206,43 @@ impl PartialEq for Pt {
 mod tests {
     use super::*;
 
-    const N: Scalar = Scalar::new(0xffffffffffffffff,
-                                  0xfffffffffffffffe,
-                                  0xbaaedce6af48a03b,
-                                  0xbfd25e8cd0364141);
+    const N: Scalar = Scalar::new(
+        0xffffffffffffffff,
+        0xfffffffffffffffe,
+        0xbaaedce6af48a03b,
+        0xbfd25e8cd0364141,
+    );
     #[test]
     fn it_checks_addition() {
-        let p = Pt::new(El::new(0x8b4b5f165df3c2be,
-                                0x8c6244b5b7456388,
-                                0x43e4a781a15bcd1b,
-                                0x69f79a55dffdf80c),
-                        El::new(0x4aad0a6f68d308b4,
-                                0xb3fbd7813ab0da04,
-                                0xf9e336546162ee56,
-                                0xb3eff0c65fd4fd36));
+        let p = Pt::new(
+            El::new(
+                0x8b4b5f165df3c2be,
+                0x8c6244b5b7456388,
+                0x43e4a781a15bcd1b,
+                0x69f79a55dffdf80c,
+            ),
+            El::new(
+                0x4aad0a6f68d308b4,
+                0xb3fbd7813ab0da04,
+                0xf9e336546162ee56,
+                0xb3eff0c65fd4fd36,
+            ),
+        );
         let mut p2 = p;
-        let res = Pt::new(El::new(0xed0c5ce4e1329171,
-                                  0x8ce17c7ec83c6110,
-                                  0x71af64ee417c997a,
-                                  0xbb3f26714755e4be),
-                          El::new(0x221a9fc7bc2345bd,
-                                  0xbf3dad7f5a7ea680,
-                                  0x49d93925763ddab1,
-                                  0x63f9fa6ea07bf42f));
+        let res = Pt::new(
+            El::new(
+                0xed0c5ce4e1329171,
+                0x8ce17c7ec83c6110,
+                0x71af64ee417c997a,
+                0xbb3f26714755e4be,
+            ),
+            El::new(
+                0x221a9fc7bc2345bd,
+                0xbf3dad7f5a7ea680,
+                0x49d93925763ddab1,
+                0x63f9fa6ea07bf42f,
+            ),
+        );
 
         p2.add_inner(&p);
 
@@ -237,14 +255,20 @@ mod tests {
         let mut a = N;
         let n_1 = Scalar::from_u64(1);
         a -= n_1;
-        let res = Pt::new(El::new(0x79be667ef9dcbbac,
-                                  0x55a06295ce870b07,
-                                  0x029bfcdb2dce28d9,
-                                  0x59f2815b16f81798),
-                          El::new(0xb7c52588d95c3b9a,
-                                  0xa25b0403f1eef757,
-                                  0x02e84bb7597aabe6,
-                                  0x63b82f6f04ef2777));
+        let res = Pt::new(
+            El::new(
+                0x79be667ef9dcbbac,
+                0x55a06295ce870b07,
+                0x029bfcdb2dce28d9,
+                0x59f2815b16f81798,
+            ),
+            El::new(
+                0xb7c52588d95c3b9a,
+                0xa25b0403f1eef757,
+                0x02e84bb7597aabe6,
+                0x63b82f6f04ef2777,
+            ),
+        );
 
         p.mul_scalar_inner(&a);
 

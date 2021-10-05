@@ -6,15 +6,17 @@ use std::fmt;
 
 use crate::scalar::Scalar;
 
-const P: Scalar = Scalar::new(0xffffffffffffffff,
-                              0xffffffffffffffff,
-                              0xffffffffffffffff,
-                              0xfffffffefffffc2f);
+const P: Scalar = Scalar::new(
+    0xffffffffffffffff,
+    0xffffffffffffffff,
+    0xffffffffffffffff,
+    0xfffffffefffffc2f,
+);
 
 /// Represent a Field Element with P = 2^256 - 2^32 - 977
 #[derive(Clone, Copy, Eq)]
 pub struct El {
-    d: [u64; 5]
+    d: [u64; 5],
 }
 
 impl El {
@@ -90,10 +92,10 @@ impl El {
         let d3 = ((b[12] >> 4) as u64)
             | (b[11] as u64) << 4
             | (b[10] as u64) << 12
-            | (b[9]  as u64) << 20
-            | (b[8]  as u64) << 28
-            | (b[7]  as u64) << 36
-            | (b[6]  as u64) << 44;
+            | (b[9] as u64) << 20
+            | (b[8] as u64) << 28
+            | (b[7] as u64) << 36
+            | (b[6] as u64) << 44;
         let d4 = (b[5] as u64)
             | (b[4] as u64) << 8
             | (b[3] as u64) << 16
@@ -167,12 +169,18 @@ impl El {
         const P1: u128 = 0x1000003d10u128; // 2^32 + 977 << 4
 
         let (a0, a1, a2, a3, a4) = (
-            self.d[0] as u128, self.d[1] as u128, self.d[2] as u128,
-            self.d[3] as u128, self.d[4] as u128
+            self.d[0] as u128,
+            self.d[1] as u128,
+            self.d[2] as u128,
+            self.d[3] as u128,
+            self.d[4] as u128,
         );
         let (b0, b1, b2, b3, b4) = (
-            b.d[0] as u128, b.d[1] as u128, b.d[2] as u128,
-            b.d[3] as u128, b.d[4] as u128
+            b.d[0] as u128,
+            b.d[1] as u128,
+            b.d[2] as u128,
+            b.d[3] as u128,
+            b.d[4] as u128,
         );
         let mut tx: u128;
         let mut cx: u128;
@@ -253,8 +261,11 @@ impl El {
         const P1: u128 = 0x1000003d10u128; // 2^32 + 977 << 4
 
         let (a0, a1, a2, a3, a4) = (
-            self.d[0] as u128, self.d[1] as u128, self.d[2] as u128,
-            self.d[3] as u128, self.d[4] as u128
+            self.d[0] as u128,
+            self.d[1] as u128,
+            self.d[2] as u128,
+            self.d[3] as u128,
+            self.d[4] as u128,
         );
         let mut tx: u128;
         let mut cx: u128;
@@ -435,7 +446,8 @@ impl El {
         const M52: u64 = 0x000fffffffffffffu64;
         const M48: u64 = 0x0000ffffffffffffu64;
         const P0: u64 = 0x1000003d1u64;
-        let (mut d0, mut d1, mut d2, mut d3, mut d4) = (self.d[0], self.d[1], self.d[2], self.d[3], self.d[4]);
+        let (mut d0, mut d1, mut d2, mut d3, mut d4) =
+            (self.d[0], self.d[1], self.d[2], self.d[3], self.d[4]);
         let mut c: u64;
 
         c = d4 >> 48;
@@ -485,7 +497,6 @@ impl El {
         self.d[4] += 0x0ffffffffffffu64 * 2 * (m + 1) - rhs.d[4];
     }
 
-
     /// Calculate (-self) % P with overflow ofm
     pub fn negate(&self, ofm: u32) -> Self {
         let mut r = El::from_u64(0);
@@ -498,8 +509,11 @@ impl El {
 #[cfg(debug_assertions)]
 impl fmt::Debug for El {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "0x{:012x}{:013x}{:013x}{:013x}{:013x}",
-               self.d[4], self.d[3], self.d[2], self.d[1], self.d[0])
+        write!(
+            f,
+            "0x{:012x}{:013x}{:013x}{:013x}{:013x}",
+            self.d[4], self.d[3], self.d[2], self.d[1], self.d[0]
+        )
     }
 }
 
@@ -592,7 +606,6 @@ impl MulAssign<El> for El {
     }
 }
 
-
 impl<'a> MulAssign<&'a El> for El {
     fn mul_assign(&mut self, rhs: &'a El) {
         self.mul_fe_assign(rhs);
@@ -661,7 +674,11 @@ impl PartialEq for El {
 
         a.reduce();
         b.reduce();
-        a.d[0] == b.d[0] && a.d[1] == b.d[1] && a.d[2] == b.d[2] && a.d[3] == b.d[3] && a.d[4] == b.d[4]
+        a.d[0] == b.d[0]
+            && a.d[1] == b.d[1]
+            && a.d[2] == b.d[2]
+            && a.d[3] == b.d[3]
+            && a.d[4] == b.d[4]
     }
 }
 
@@ -858,13 +875,13 @@ mod tests {
             0x9075b4ee4d4788ca,
             0xbb49f7f81c221151,
             0xfa2f68914d0aa833,
-            0x388fa11ff621a970
+            0x388fa11ff621a970,
         );
         let r2 = El::new(
             0xb7e31a064ed74d31,
             0x4de79011c5f0a46a,
             0xc155602353dc3d34,
-            0x0fbeaeec9767a6a6
+            0x0fbeaeec9767a6a6,
         );
         b.inverse();
         assert_eq!(b, r2);
@@ -876,16 +893,15 @@ mod tests {
             0x955a14ded1a61169,
             0x67f7af027561b409,
             0xf3c66ca8c2c5dcad,
-            0x67dfe18cbfa9fa6c
+            0x67dfe18cbfa9fa6c,
         );
         let r = El::new(
             0x1b17ded65c85729d,
             0x4523ed7e305c613a,
             0x10400c3e2e8ef0ed,
-            0x06fce4838dea63b8
+            0x06fce4838dea63b8,
         );
         c.inverse();
         assert_eq!(c, r);
     }
-
 }

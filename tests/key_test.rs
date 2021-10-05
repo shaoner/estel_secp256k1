@@ -1,6 +1,5 @@
 use estel_secp256k1::generate_keypair_from_seed;
 
-
 #[test]
 fn it_verify_a_signature_from_buffer() {
     let (privkey, pubkey) = generate_keypair_from_seed("n00b".as_bytes());

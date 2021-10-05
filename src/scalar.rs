@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
-use std::ops::{Add, AddAssign, Sub, SubAssign};
 use std::mem;
+use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 #[cfg(debug_assertions)]
 use std::fmt;
@@ -15,15 +15,12 @@ const SECP256K1_N_3: u64 = 0xffffffffffffffffu64;
 const SECP256K1_NI_0: u64 = 0x402da1732fc9bebfu64;
 const SECP256K1_NI_1: u64 = 0x4551231950b75fc4u64;
 
-const N: Scalar = Scalar::new(SECP256K1_N_3,
-                              SECP256K1_N_2,
-                              SECP256K1_N_1,
-                              SECP256K1_N_0);
+const N: Scalar = Scalar::new(SECP256K1_N_3, SECP256K1_N_2, SECP256K1_N_1, SECP256K1_N_0);
 
 /// Represent 256 bits numbers with support for sign and carry
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Scalar {
-    pub d: [u64; 5]
+    pub d: [u64; 5],
 }
 
 impl Scalar {
@@ -475,8 +472,11 @@ impl Scalar {
 #[cfg(debug_assertions)]
 impl fmt::Debug for Scalar {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "0x{:016x}{:016x}{:016x}{:016x}{:016x}",
-               self.d[4], self.d[3], self.d[2], self.d[1], self.d[0])
+        write!(
+            f,
+            "0x{:016x}{:016x}{:016x}{:016x}{:016x}",
+            self.d[4], self.d[3], self.d[2], self.d[1], self.d[0]
+        )
     }
 }
 
@@ -595,16 +595,16 @@ impl Ord for Scalar {
         if self.d[4] > other.d[4] {
             // same sign
             if (self.d[4] ^ other.d[4]) >> 63 == 0 {
-                return Ordering::Greater
+                return Ordering::Greater;
             } else {
-                return Ordering::Less
+                return Ordering::Less;
             }
         }
         if self.d[4] < other.d[4] {
             if (self.d[4] ^ other.d[4]) >> 63 == 0 {
-                return Ordering::Less
+                return Ordering::Less;
             } else {
-                return Ordering::Greater
+                return Ordering::Greater;
             }
         }
         // d[4] == other.d[4], same signs
@@ -632,14 +632,18 @@ mod tests {
 
     #[test]
     fn it_div2() {
-        let mut a = Scalar::new(0x0000000000000000,
-                                0x0000000000000000,
-                                0x0000000000000100,
-                                0x0000000000000000);
-        let b = Scalar::new(0x0000000000000000,
-                            0x0000000000000000,
-                            0x0000000000000020,
-                            0x0000000000000000);
+        let mut a = Scalar::new(
+            0x0000000000000000,
+            0x0000000000000000,
+            0x0000000000000100,
+            0x0000000000000000,
+        );
+        let b = Scalar::new(
+            0x0000000000000000,
+            0x0000000000000000,
+            0x0000000000000020,
+            0x0000000000000000,
+        );
 
         a.div2();
         a.div2();
@@ -687,33 +691,45 @@ mod tests {
 
     #[test]
     fn it_modinv() {
-        let mut a = Scalar::new(0xffffffffffffffff,
-                                0xffffffffffffffff,
-                                0xffffffffffffffff,
-                                0xfffffbfefffffc2f);
-        let mut b = Scalar::new(0x7fffffffffffffff,
-                                0xffffffffffffffff,
-                                0xffffffffffffffff,
-                                0xffffffff7ffffe18);
-        let mut c = Scalar::new(0x0000000000000000,
-                                0x0000000000000000,
-                                0x0000000000000000,
-                                0x0000000000111111);
+        let mut a = Scalar::new(
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+            0xfffffbfefffffc2f,
+        );
+        let mut b = Scalar::new(
+            0x7fffffffffffffff,
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+            0xffffffff7ffffe18,
+        );
+        let mut c = Scalar::new(
+            0x0000000000000000,
+            0x0000000000000000,
+            0x0000000000000000,
+            0x0000000000111111,
+        );
 
-        let p = Scalar::new(0xffffffffffffffff,
-                            0xffffffffffffffff,
-                            0xffffffffffffffff,
-                            0xfffffffefffffc2f);
+        let p = Scalar::new(
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+            0xfffffffefffffc2f,
+        );
 
-        let res = Scalar::new(0xb88b76b2b3bfffff,
-                              0xffffffffffffffff,
-                              0xffffffffffffffff,
-                              0xffffffff4774868d);
+        let res = Scalar::new(
+            0xb88b76b2b3bfffff,
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+            0xffffffff4774868d,
+        );
         let res2 = Scalar::from_u64(0x2);
-        let res3 = Scalar::new(0x3eb0f23eb0f23eb0,
-                               0xf23eb0f23eb0f23e,
-                               0xb0f23eb0f23eb0f2,
-                               0x3eb0f23e72414b83);
+        let res3 = Scalar::new(
+            0x3eb0f23eb0f23eb0,
+            0xf23eb0f23eb0f23e,
+            0xb0f23eb0f23eb0f2,
+            0x3eb0f23e72414b83,
+        );
 
         a.modinv_inner_from(&p);
         assert_eq!(a, res);
@@ -727,16 +743,19 @@ mod tests {
 
     #[test]
     fn it_multiply_scalars() {
-        let mut n1 = Scalar::new(0xb88b76b2b3bfffff,
-                                 0xffffffffffffffff,
-                                 0xffffffffffffffff,
-                                 0xffffffff4774868d);
+        let mut n1 = Scalar::new(
+            0xb88b76b2b3bfffff,
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+            0xffffffff4774868d,
+        );
         let n2 = n1;
-        let res = Scalar::new(0xdb450d7d8d367a92,
-                              0xca286d6fe9413357,
-                              0x6f2fbc0c5131616a,
-                              0x1908465a56ab3e28);
-
+        let res = Scalar::new(
+            0xdb450d7d8d367a92,
+            0xca286d6fe9413357,
+            0x6f2fbc0c5131616a,
+            0x1908465a56ab3e28,
+        );
 
         n1.mulmod_inner(&n2);
         assert_eq!(n1, res);
@@ -746,10 +765,12 @@ mod tests {
     fn it_multiply_scalars2() {
         let mut n1 = N - Scalar::from_u64(0x42);
         let n2 = N + Scalar::from_u64(0x43);
-        let res = Scalar::new(0xffffffffffffffff,
-                              0xfffffffffffffffe,
-                              0xbaaedce6af48a03b,
-                              0xbfd25e8cd0362ffb);
+        let res = Scalar::new(
+            0xffffffffffffffff,
+            0xfffffffffffffffe,
+            0xbaaedce6af48a03b,
+            0xbfd25e8cd0362ffb,
+        );
 
         n1.mulmod_inner(&n2);
         assert_eq!(n1, res);
