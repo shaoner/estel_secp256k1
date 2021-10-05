@@ -8,15 +8,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  formatting:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check formatting
+        run: cargo fmt --all -- --check
   lint:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - name: Linting
+      - name: Check style
         run: ./lint.sh
   test:
     runs-on: ubuntu-20.04
-
     steps:
       - uses: actions/checkout@v2
       - name: Run unit tests
